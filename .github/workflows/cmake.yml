@@ -1,0 +1,459 @@
+name: CMake Build Matrix
+
+on: [ push, pull_request ]
+
+env:
+  CMAKE_VERSION: 3.29
+  NINJA_VERSION: 1.11.1
+  CCACHE_VERSION: 3.7.7
+  BUILD_TYPE: Release
+  CI_RUNNING: 1
+  VCPKG_TARGET_TRIPLET: x64-windows
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "Windows Latest MSVC", artifact: "Windows-MSVC.7z",
+            os: windows-latest,
+            cc: "cl", cxx: "cl",
+            environment_script: "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat",
+            tcf: "-D CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+
+            # https://github.com/actions/runner-images/blob/macos-14-arm64/20240827.4/images/windows/Windows2022-Readme.md
+          }
+          #- {
+          #  name: "Windows Latest MinGW", artifact: "Windows-MinGW.7z",
+          #  os: windows-latest,
+          #  cc: "gcc", cxx: "g++"
+          #}
+          - {
+            name: "Ubuntu Latest GCC", artifact: "Linux.7z",
+            os: ubuntu-latest,
+            cc: "gcc-12", cxx: "g++-12" # for 22.04, gcc-10, 11, 12 are valid.
+
+            # now it's 22.04, at 2024-10-01,
+            # https://github.com/actions/runner-images/blob/macos-14-arm64/20240827.4/images/ubuntu/Ubuntu2204-Readme.md
+            # https://github.com/actions/runner-images/blob/macos-14-arm64/20240827.4/images/ubuntu/Ubuntu2404-Readme.md
+          }
+          - {
+            name: "macOS Latest Arm64", artifact: "macOS.7z",
+            os: macos-latest,
+            cc: "clang", cxx: "clang++"
+
+              # https://github.com/actions/runner-images/blob/macos-14-arm64/20240827.4/images/macos/macos-14-arm64-Readme.md
+              # https://github.com/actions/runner-images/releases/tag/macos-14-arm64%2F20240827.4
+          }
+          #- {
+          #  name: "macOS Latest Intel", artifact: "macOS-intel.7z",
+          #  os: macos-latest-large,
+          #  cc: "clang", cxx: "clang++"
+          #
+          #    # https://github.com/actions/runner-images
+          #}
+
+    steps:
+      - uses: actions/checkout@v1
+
+      # - name: Install gcc 10+ for Ubuntu-18
+      #   #if: matrix.os == 'ubuntu-latest'
+      #   if: runner.os == 'Linux' # Linux, Windows, macOS
+      #   run: |
+      #     # if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+      #     if [[ "$(gcc --version|head -1)" != *10.* ]]; then
+      #       sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+      #       sudo apt update
+      #       sudo apt install -y gcc-10 g++-10
+      #     fi
+      #     # fi
+
+
+      - name: Download Ninja and CMake
+        shell: cmake -P {0}
+        run: |
+          set(cmake_version $ENV{CMAKE_VERSION})
+          set(ninja_version $ENV{NINJA_VERSION})
+          message(STATUS "Using host CMake version: ${CMAKE_VERSION}")
+          if ("${{ runner.os }}" STREQUAL "Windows")
+            set(ninja_suffix "win.zip")
+            set(cmake_suffix "win64-x64.zip")
+            set(cmake_dir "cmake-${cmake_version}-win64-x64/bin")
+          elseif ("${{ runner.os }}" STREQUAL "Linux")
+            set(ninja_suffix "linux.zip")
+            set(cmake_suffix "Linux-x86_64.tar.gz")
+            set(cmake_dir "cmake-${cmake_version}-Linux-x86_64/bin")
+          elseif ("${{ runner.os }}" STREQUAL "macOS")
+            set(ninja_suffix "mac.zip")
+            set(cmake_suffix "Darwin-x86_64.tar.gz")
+            set(cmake_dir "cmake-${cmake_version}-Darwin-x86_64/CMake.app/Contents/bin")
+          endif()
+          set(ninja_url "https://github.com/ninja-build/ninja/releases/download/v${ninja_version}/ninja-${ninja_suffix}")
+          file(DOWNLOAD "${ninja_url}" ./ninja.zip SHOW_PROGRESS)
+          execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ninja.zip)
+          set(cmake_url "https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-${cmake_suffix}")
+          file(DOWNLOAD "${cmake_url}" ./cmake.zip SHOW_PROGRESS)
+          execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./cmake.zip)
+          # Add to PATH environment variable
+          file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/${cmake_dir}" cmake_dir)
+          set(path_separator ":")
+          if ("${{ runner.os }}" STREQUAL "Windows")
+            set(path_separator ";")
+          endif()
+          file(APPEND "$ENV{GITHUB_PATH}" "$ENV{GITHUB_WORKSPACE}${path_separator}${cmake_dir}")
+          if (NOT "${{ runner.os }}" STREQUAL "Windows")
+            execute_process(
+              COMMAND chmod +x ninja
+              COMMAND chmod +x ${cmake_dir}/cmake
+            )
+          endif()
+      - name: Download ccache
+        id: ccache
+        shell: cmake -P {0}
+        run: |
+          set(ccache_url "https://github.com/cristianadam/ccache/releases/download/v$ENV{CCACHE_VERSION}/${{ runner.os }}.tar.xz")
+          file(DOWNLOAD "${ccache_url}" ./ccache.tar.xz SHOW_PROGRESS)
+          execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ccache.tar.xz)
+      - name: Prepare ccache timestamp
+        id: ccache_cache_timestamp
+        shell: bash
+        run: |
+          # string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
+          # message("::set-output name=timestamp::${current_date}")
+          echo "timestamp=${{ matrix.os }}-${{ matrix.type }}" >> $GITHUB_STATE
+      - name: ccache cache files
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ${{ matrix.config.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
+          restore-keys: |
+            ${{ matrix.config.name }}-ccache-1-
+
+
+
+      - name: container env tests
+        if: matrix.os != 'windows-latest'
+        shell: bash
+        run: |
+          echo "RUNNER_OS:                    $RUNNER_OS"
+          echo "uname -p (processor):         $(uname -p)"
+          echo "uname -s (kernel name):       $(uname -s)"
+          echo "uname -r (kernel release):    $(uname -r)"
+          echo "uname -v (kernel version):    $(uname -v)"
+          echo "uname -m (machine):           $(uname -m)"
+          if [ "$RUNNER_OS" != "macOS" ]; then
+            echo "uname -i (hardware platform): $(uname -i)"
+          fi
+          echo "uname -o (operation system):  $(uname -o)"
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            cat /etc/*-release
+          fi
+
+      - name: cmake env tests
+        if: matrix.os != 'windows-latest'
+        shell: cmake -P {0}
+        run: |
+          message(STATUS "PROCESSOR_ARCHITEW6432        = ${PROCESSOR_ARCHITEW6432}")
+          message(STATUS "PROCESSOR_ARCHITECTURE        = ${PROCESSOR_ARCHITECTURE}")
+          message(STATUS "CMAKE_APPLE_SILICON_PROCESSOR = ${CMAKE_APPLE_SILICON_PROCESSOR}")
+          message(STATUS "CMAKE_SYSTEM                  = ${CMAKE_SYSTEM}")
+          message(STATUS "CMAKE_SYSTEM_NAME             = ${CMAKE_SYSTEM_NAME}")
+          message(STATUS "CMAKE_SYSTEM_PROCESSOR        = ${CMAKE_SYSTEM_PROCESSOR}")
+          message(STATUS "CMAKE_SYSTEM_VERSION          = ${CMAKE_SYSTEM_VERSION}")
+          message(STATUS "CMAKE_HOST_SYSTEM_PROCESSOR   = ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+          message(STATUS "CMAKE_HOST_SYSTEM_NAME        = ${CMAKE_HOST_SYSTEM_NAME}")
+          message(STATUS "CMAKE_HOST_SYSTEM_VERSION     = ${CMAKE_HOST_SYSTEM_VERSION}")
+          message(STATUS "CMAKE_HOST_APPLE              = ${CMAKE_HOST_APPLE}")
+          message(STATUS "CMAKE_HOST_LINUX              = ${CMAKE_HOST_LINUX}")
+          message(STATUS "CMAKE_HOST_UNIX               = ${CMAKE_HOST_UNIX}")
+          message(STATUS "CMAKE_HOST_WIN32              = ${CMAKE_HOST_WIN32}")
+          message(STATUS "CMAKE_HOST_SOLARIS            = ${CMAKE_HOST_SOLARIS}")
+          message(STATUS "CMAKE_HOST_BSD                = ${CMAKE_HOST_BSD}")
+          message(STATUS "CMAKE_LIBRARY_ARCHITECTURE    = ${CMAKE_LIBRARY_ARCHITECTURE}")
+
+      # - name: Install 7zip
+      #   run: |
+      #     if [ "$RUNNER_OS" == "Linux" ]; then
+      #          sudo apt install -y p7zip-full
+      #     elif [ "$RUNNER_OS" == "Windows" ]; then
+      #          # choco install yaml-cpp
+      #          vcpkg install 7zip
+      #     elif [ "$RUNNER_OS" == "Darwin" ]; then
+      #          # brew install p7zip
+      #          true
+      #     elif [ "$RUNNER_OS" == "macOS" ]; then
+      #          # brew install p7zip
+      #          true
+      #     else
+      #          echo "RUNNER OS ($RUNNER_OS) not supported"
+      #          exit 1
+      #     fi
+      #   shell: bash
+
+      # - name: Install yaml-cpp
+      #   run: |
+      #     if [ "$RUNNER_OS" == "Linux" ]; then
+      #          sudo apt install -y libyaml-cpp-dev
+      #     elif [ "$RUNNER_OS" == "Windows" ]; then
+      #          # choco install yaml-cpp
+      #          vcpkg install yaml-cpp:x64-windows
+      #     elif [ "$RUNNER_OS" == "Darwin" ]; then
+      #          brew install yaml-cpp
+      #     elif [ "$RUNNER_OS" == "macOS" ]; then
+      #          echo "install yaml-cpp in macOS"
+      #          brew install yaml-cpp
+      #          # cannot work for arm64 macOS:
+      #          # ls -la $(brew --prefix yaml-cpp)/ /usr/local/include/yaml-cpp/ /usr/local/lib/libyaml-cpp*
+      #          # ls -la $(brew --prefix yaml-cpp)/ /opt/homebrew/include/yaml-cpp/ /opt/homebrew/lib/libyaml-cpp*
+      #     else
+      #          echo "$RUNNER_OS not supported"
+      #          exit 1
+      #     fi
+      #   shell: bash
+
+      # - name: Install Catch2
+      #   run: |
+      #     if [ "$RUNNER_OS" == "Linux" ]; then
+      #          # sudo apt install -y catch2
+      #          echo "don't install catch2 via package manager"
+      #     elif [ "$RUNNER_OS" == "Windows" ]; then
+      #          # choco install catch2
+      #          vcpkg install catch2:x64-windows
+      #     elif [ "$RUNNER_OS" == "Darwin" ]; then
+      #          brew install catch2
+      #     elif [ "$RUNNER_OS" == "macOS" ]; then
+      #          echo "install catch2 in macOS"
+      #          brew install catch2
+      #          # cannot work for arm64 macOS:
+      #          # ls -la $(brew --prefix yaml-cpp)/ /usr/local/include/yaml-cpp/ /usr/local/lib/libyaml-cpp*
+      #          # ls -la $(brew --prefix yaml-cpp)/ /opt/homebrew/include/yaml-cpp/ /opt/homebrew/lib/libyaml-cpp*
+      #     else
+      #          echo "$RUNNER_OS not supported"
+      #          exit 1
+      #     fi
+      #   shell: bash
+
+      # - name: prepare tools (doxygen, ...)
+      #   id: building_tools
+      #   run: |
+      #     sudo apt-get install doxygen
+
+      - name: Configure
+        shell: cmake -P {0}
+        run: |
+          set(ENV{CC} ${{ matrix.config.cc }})
+          set(ENV{CXX} ${{ matrix.config.cxx }})
+          message(STATUS "### TCF: '${{ matrix.config.tcf }}'")
+          if ("${{ runner.os }}" STREQUAL "Windows" AND NOT "x${{ matrix.config.environment_script }}" STREQUAL "x")
+            execute_process(
+              COMMAND "${{ matrix.config.environment_script }}" && set
+              OUTPUT_FILE environment_script_output.txt
+            )
+            file(STRINGS environment_script_output.txt output_lines)
+            foreach(line IN LISTS output_lines)
+              if (line MATCHES "^([a-zA-Z0-9_-]+)=(.*)$")
+                set(ENV{${CMAKE_MATCH_1}} "${CMAKE_MATCH_2}")
+              endif()
+            endforeach()
+          endif()
+          set(path_separator ":")
+          if ("${{ runner.os }}" STREQUAL "Windows")
+            set(path_separator ";")
+            message(STATUS "VCPKG: $ENV{VCPKG_TARGET_TRIPLET} | ${{ matrix.config.tcf }}")
+          endif()
+          set(ENV{PATH} "$ENV{GITHUB_WORKSPACE}${path_separator}$ENV{PATH}")
+          execute_process(
+            COMMAND cmake
+              -S .
+              -B build
+              -D CMAKE_BUILD_TYPE=$ENV{BUILD_TYPE}
+              -G Ninja
+              -D CMAKE_MAKE_PROGRAM=ninja
+              -D CMAKE_C_COMPILER_LAUNCHER=ccache
+              -D CMAKE_CXX_COMPILER_LAUNCHER=ccache
+              ${{ matrix.config.tcf }}
+            RESULT_VARIABLE result
+          )
+          if (NOT result EQUAL 0)
+            message(FATAL_ERROR "Bad exit status")
+          endif()
+      - name: Build
+        shell: cmake -P {0}
+        run: |
+          set(ENV{CC} ${{ matrix.config.cc }})
+          set(ENV{CXX} ${{ matrix.config.cxx }})
+          set(ENV{NINJA_STATUS} "[%f/%t %o/sec] ")
+          if ("${{ runner.os }}" STREQUAL "Windows" AND NOT "x${{ matrix.config.environment_script }}" STREQUAL "x")
+            file(STRINGS environment_script_output.txt output_lines)
+            foreach(line IN LISTS output_lines)
+              if (line MATCHES "^([a-zA-Z0-9_-]+)=(.*)$")
+                set(ENV{${CMAKE_MATCH_1}} "${CMAKE_MATCH_2}")
+              endif()
+            endforeach()
+          endif()
+          file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}" ccache_basedir)
+          set(ENV{CCACHE_BASEDIR} "${ccache_basedir}")
+          set(ENV{CCACHE_DIR} "${ccache_basedir}/.ccache")
+          set(ENV{CCACHE_COMPRESS} "true")
+          set(ENV{CCACHE_COMPRESSLEVEL} "6")
+          set(ENV{CCACHE_MAXSIZE} "400M")
+          if ("${{ matrix.config.cxx }}" STREQUAL "cl")
+            set(ENV{CCACHE_MAXSIZE} "600M")
+          endif()
+          execute_process(COMMAND ccache -p)
+          execute_process(COMMAND ccache -z)
+          execute_process(
+            COMMAND cmake --build build
+            RESULT_VARIABLE result
+            OUTPUT_VARIABLE output
+            ERROR_VARIABLE output
+            ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE
+          )
+          if (NOT result EQUAL 0)
+            string(REGEX MATCH "FAILED:.*$" error_message "${output}")
+            string(REPLACE "\n" "%0A" error_message "${error_message}")
+            message("::error::${error_message}")
+            message(FATAL_ERROR "Build failed")
+          endif()
+          execute_process(COMMAND ccache -s)
+      - name: Run tests
+        shell: cmake -P {0}
+        run: |
+          include(ProcessorCount)
+          ProcessorCount(N)
+          set(ENV{CTEST_OUTPUT_ON_FAILURE} "ON")
+          execute_process(
+            COMMAND ctest -V -j ${N}
+            WORKING_DIRECTORY build
+            RESULT_VARIABLE result
+            OUTPUT_VARIABLE output
+            ERROR_VARIABLE output
+            ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE
+          )
+          if (NOT result EQUAL 0)
+            string(REGEX MATCH "[0-9]+% tests.*[0-9.]+ sec.*$" test_results "${output}")
+            string(REPLACE "\n" "%0A" test_results "${test_results}")
+            message("::error::${test_results}")
+            message(FATAL_ERROR "Running tests failed!")
+          endif()
+      - name: Install Strip
+        run: cmake --install build --prefix instdir --strip
+
+      - name: Pack
+        working-directory: instdir
+        # if: contains(github.ref, 'tags/v')
+        run: |
+          cmake -E tar cfv ../${{ matrix.config.artifact }} --format=7zip .
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./${{ matrix.config.artifact }}
+          name: ${{ matrix.config.artifact }}
+
+  release:
+    if: contains(github.ref, 'tags/v')
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Store Release url
+        run: |
+          echo "${{ steps.create_release.outputs.upload_url }}" > ./upload_url
+      - uses: actions/upload-artifact@v4
+        with:
+          path: ./upload_url
+          name: upload_url
+
+  publish:
+    if: contains(github.ref, 'tags/v')
+    needs: release
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "Windows Latest MSVC", artifact: "Windows-MSVC.7z",
+            os: windows-latest,
+            cc: "cl", cxx: "cl",
+            environment_script: "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat",
+            tcf: "-D CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+
+              # https://github.com/actions/runner-images/blob/macos-14-arm64/20240827.4/images/windows/Windows2022-Readme.md
+          }
+          #- {
+          #  name: "Windows Latest MinGW", artifact: "Windows-MinGW.7z",
+          #  os: windows-latest,
+          #  cc: "gcc", cxx: "g++"
+          #}
+          - {
+            name: "Ubuntu Latest GCC", artifact: "Linux.7z",
+            os: ubuntu-latest,
+            cc: "gcc-12", cxx: "g++-12"
+
+              # https://github.com/actions/runner-images/blob/macos-14-arm64/20240827.4/images/ubuntu/Ubuntu2404-Readme.md
+          }
+          - {
+            name: "macOS Latest Arm64", artifact: "macOS.7z",
+            os: macos-latest,
+            cc: "clang", cxx: "clang++"
+
+              # https://github.com/actions/runner-images/blob/macos-14-arm64/20240827.4/images/macos/macos-14-arm64-Readme.md
+              # https://github.com/actions/runner-images/releases/tag/macos-14-arm64%2F20240827.4
+          }
+          #- {
+          #  name: "macOS Latest Intel", artifact: "macOS-intel.7z",
+          #  os: macos-latest-large,
+          #  cc: "clang", cxx: "clang++"
+          #
+          #    # https://github.com/actions/runner-images
+          #}
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.config.artifact }}
+          path: ./
+
+      - name: Download URL
+        uses: actions/download-artifact@v4
+        with:
+          name: upload_url
+          path: ./
+      - uses: pCYSl5EDgo/cat@master
+        id: set_upload_url
+        with:
+          path: ./upload_url
+      # - name: set_upload_url
+      #   if: matrix.os != 'windows-latest'
+      #   run: |
+      #     upload_url=`cat ./upload_url`
+      #     echo ::set-output name=upload_url::$upload_url
+      - name: Upload to Release
+        id: upload_to_release
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.set_upload_url.outputs.text }}
+          asset_path: ./${{ matrix.config.artifact }}
+          asset_name: ${{ matrix.config.artifact }}
+          asset_content_type: application/x-gtar
