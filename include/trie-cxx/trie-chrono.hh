@@ -431,29 +431,34 @@ namespace trie::chrono {
 		os.fill('0');
 		typedef duration<int, std::ratio<86400 * 365> > years_;
 		const auto y = duration_cast<years_>(ns);
+		bool overs{};
 		if (y.count()) {
 			foundNonZero = true;
-			os << y.count() << "y:";
+			os << y.count() << 'y' << ':';
 			ns -= y;
+			overs = true;
 		}
 		typedef duration<int, std::ratio<86400> > days_;
 		const auto d = duration_cast<days_>(ns);
 		if (d.count()) {
 			foundNonZero = true;
-			os << d.count() << "d:";
+			os << d.count() << 'd' << ':';
 			ns -= d;
+			overs = true;
 		}
 		const auto h = duration_cast<hours>(ns);
 		if (h.count() || foundNonZero) {
 			foundNonZero = true;
-			os << h.count() << "h:";
+			os << h.count() << 'h' << ':';
 			ns -= h;
+			overs = true;
 		}
 		const auto m = duration_cast<minutes>(ns);
 		if (m.count() || foundNonZero) {
 			foundNonZero = true;
-			os << m.count() << "m";
+			os << m.count() << 'm';
 			ns -= m;
+			overs = true;
 		}
 
 		bool z{};
@@ -461,12 +466,18 @@ namespace trie::chrono {
 		if (s.count() || z) {
 			z = true;
 			if (foundNonZero) os << ':';
-			os << s.count() << "s";
+			os << s.count() << 's';
 			ns -= s;
+			overs = true;
 		}
+		bool plus{};
 		bool z1{};
 		const auto ms = duration_cast<milliseconds>(ns);
 		if (ms.count() || z1) {
+			if (!plus && overs) {
+				os << '+';
+				plus = true;
+			}
 			if (foundNonZero)
 				os << std::setw(3) << ms.count();
 			else
@@ -478,7 +489,12 @@ namespace trie::chrono {
 		const auto us = duration_cast<microseconds>(ns);
 		if (us.count() || z2) {
 			if (z1) {
-				os << '.';
+				if (!plus && overs) {
+					os << '+';
+					plus = true;
+				} else {
+					os << '.';
+				}
 				zdot1 = true;
 			}
 			if (foundNonZero)
@@ -491,7 +507,12 @@ namespace trie::chrono {
 		bool z3{};
 		if (ns.count() || z3) {
 			if (!z1 && z2) {
-				os << '.';
+				if (!plus && overs) {
+					os << '+';
+					plus = true;
+				} else {
+					os << '.';
+				}
 				zdot2 = true;
 			}
 			os << std::setw(3) << ns.count();

@@ -129,7 +129,53 @@ namespace trie {
 		return os;
 	}
 
+	/**
+	 * @details lite_ios_fmt_saver can restore the fmtflags after these:
+	 * std::hex, std::dec, std::right, ...,
+	 * it cannot save the state by std::setfill, use ios_fmt_saver for that.
+	 *
+	 * @code{.cpp}
+	 *	lite_ios_fmt_saver(os)() << '\'' << '\\' << 'x' << std::hex << (int) arg << '\''; // formatting to '\xa9' form
+	 *	ios_fmt_saver(os)() << std::setfill('0') << std::hex << (int) arg << 'm'; // hh:mm part
+	 * @endcode
+	 *
+	 * @formatter:off
+	 */
+	struct lite_ios_fmt_saver {
+		std::ostream &os;
+		std::ios_base::fmtflags f;
+		explicit lite_ios_fmt_saver(std::ostream &os = std::cout) : os(os), f(os.flags()) {}
+		~lite_ios_fmt_saver() { os.flags(f); }
+		explicit operator std::ostream &() const { return os; }
+		std::ostream &operator()() const { return os; }
+	};/* @formatter:on */
 
+	/**
+	 * @details while using std::setfill(anychar), ios_fmt_saver can restore
+	 * the old state.
+	 * ios_fmt_saver can save and restore everything of a stream.
+	 * In most cases, you might not need to ask to ios_fmt_saver, instead
+	 * of by using lite_ios_fmt_saver to save and restore fmtflags in a
+	 * light-weight way.
+	 *
+	 * @code{.cpp}
+	 * lite_ios_fmt_saver(os)() << '\'' << '\\' << 'x' << std::hex << (int) arg << '\''; // formatting to '\xa9' form
+	 * ios_fmt_saver(os)() << std::setfill('0') << std::hex << (int) arg << 'm'; // hh:mm part
+	 * @endcode
+	 *
+	 * @formatter:off
+	 */
+	struct ios_fmt_saver {
+		std::ostream &os;
+		std::ios old_state{};
+		explicit ios_fmt_saver(std::ostream &os = std::cout) : os(os) { old_state.copyfmt(os); }
+		~ios_fmt_saver() { os.copyfmt(old_state); }
+		explicit operator std::ostream &() const { return os; }
+		std::ostream &operator()() const { return os; }
+	};/* @formatter:on */
+
+	// NOTE fixed fmtflags state after printed int8_t,...;
+	// added ios_fmt_saver;
 	[[maybe_unused]] inline auto variant_to_string(std::ostream &os, base_t const &v) -> std::ostream & {
 		// std::stringstream os;
 
@@ -146,7 +192,7 @@ namespace trie {
 			           else if constexpr (std::is_same_v<T, int>)
 				           os << arg;
 			           else if constexpr (std::is_same_v<T, int8_t>)
-				           os << arg;
+				           lite_ios_fmt_saver(os)() << '\'' << '\\' << 'x' << std::hex << (int) arg << '\'';
 			           else if constexpr (std::is_same_v<T, int16_t>)
 				           os << arg;
 				           // else if constexpr (std::is_same_v<T, int32_t>)
@@ -156,9 +202,10 @@ namespace trie {
 			           else if constexpr (std::is_same_v<T, unsigned int>)
 				           os << arg;
 			           else if constexpr (std::is_same_v<T, uint8_t>)
-				           os << arg;
+				           lite_ios_fmt_saver(os)() << '\'' << '\\' << 'x' << std::hex << (unsigned int) arg << '\'';
 			           else if constexpr (std::is_same_v<T, std::byte>)
-				           os << (uint8_t) arg;
+				           // os << (uint8_t) arg;
+				           lite_ios_fmt_saver(os)() << '\'' << '\\' << 'x' << std::hex << (unsigned int) arg << '\'';
 			           else if constexpr (std::is_same_v<T, uint16_t>)
 				           os << arg;
 			           else if constexpr (std::is_same_v<T, uint32_t>)

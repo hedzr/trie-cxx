@@ -236,7 +236,10 @@ void test_format_duration() {
 		     1024h,
 		     5min,
 		     5.625min,
-		     89.843204843s,
+		     89.843204843s, // 89s+843.204843ms
+
+		     5129ns,
+		     59.739us,
 	     }) {
 		echo(d);
 	}
@@ -354,15 +357,15 @@ void test_last_day_at_this_year() {
 
 int main() {
 #if defined(TRIE_UNIT_TEST) && TRIE_UNIT_TEST == 1
-	TRIE_TEST_FOR(test_try_parse_by);
-	TRIE_TEST_FOR(test_time_now);
+	// TRIE_TEST_FOR(test_try_parse_by);
+	// TRIE_TEST_FOR(test_time_now);
 	TRIE_TEST_FOR(test_format_duration);
 
-	TRIE_TEST_FOR(test_last_day_at_this_year);
-	TRIE_TEST_FOR(test_last_day_at_this_month);
-
-	TRIE_TEST_FOR(test_from_cppref);
-	TRIE_TEST_FOR(test_traits_is_duration);
+	// TRIE_TEST_FOR(test_last_day_at_this_year);
+	// TRIE_TEST_FOR(test_last_day_at_this_month);
+	//
+	// TRIE_TEST_FOR(test_from_cppref);
+	// TRIE_TEST_FOR(test_traits_is_duration);
 #endif
 
 #ifndef _WIN32

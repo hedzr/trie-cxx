@@ -85,10 +85,11 @@ namespace trie::tests {
 	}
 
 	auto test_value_t() -> void {
-#define TRY_VALUE_T(expr)                                        \
-	{                                                              \
-		trie::value_t v1{expr};                                      \
-		std::cout << ".. assigning " << #expr << ": " << v1 << '\n'; \
+#define TRY_VALUE_T(expr)                                                                                            \
+	{                                                                                                                  \
+		trie::ios_fmt_saver sav{std::cout};                                                                              \
+		trie::value_t v1{expr};                                                                                          \
+		std::cout << ".. assigning " << std::setfill(' ') << std::right << std::setw(21) << #expr << ": " << v1 << '\n'; \
 	}
 
 		using namespace std::literals::chrono_literals; // c++14 or later
@@ -123,6 +124,12 @@ namespace trie::tests {
 		TRY_VALUE_T(89.843204843s);
 		TRY_VALUE_T(5min);
 		TRY_VALUE_T(1024h);
+
+		TRY_VALUE_T("string");
+		const char *s1 = "hello";
+		TRY_VALUE_T(s1);
+		std::string s2{s1};
+		TRY_VALUE_T(s2);
 	}
 
 	void test1(int choice = 1) {
@@ -214,19 +221,19 @@ namespace trie::tests {
 		const bool find_test{false};
 		if (find_test) {
 			trie::chrono::high_res_duration hrd([MAX_FINDS, &keys](auto duration) -> bool {
-				std::cout << "test5_bench_find<2>: It took " << duration << ", each find/locate takes " << (
-					duration / MAX_FINDS / keys.size() / 2) << "." << '\n';
+				std::cout << "test5_bench_find<2>: It took " << duration << ", each find/locate takes " << (duration / MAX_FINDS / keys.size() / 2) << "." << '\n';
 				return false;
 			});
 			for (int i = 0; i < MAX_FINDS; i++) {
-				for (auto const &key: keys) {
+				for (auto const &key : keys) {
 					auto ret = tt.locate(key.c_str());
 					auto ret1 = tt.find(key.c_str());
 					(void) ret;
 					(void) ret1; // UNUSED(ret, ret1);
 				}
 			}
-		} {
+		}
+		{
 			int failed_fast_find{0};
 
 			// trie::chrono::high_res_duration hrd([MAX_FINDS, &keys, failed_fast_find](auto duration) -> bool {
@@ -248,7 +255,7 @@ namespace trie::tests {
 			});
 
 			for (int i = 0; i < MAX_FINDS; i++) {
-				for (auto const &key: keys) {
+				for (auto const &key : keys) {
 					auto ret = tt.fast_find(key.c_str());
 					(void) ret;
 					if (!ret.matched)
@@ -441,8 +448,8 @@ SCENARIO("trie/store: unit tests", "[trie][unit-test]") {
 	}
 	GIVEN("about extension package, and different delimiter char") {
 		using describable_store = trie::trie_t<
-			trie::value_t, '/',
-			trie::extensions::description_holder<> >;
+		        trie::value_t, '/',
+		        trie::extensions::description_holder<>>;
 		describable_store ds;
 
 		ds.insert("app/home/ops", 1);
@@ -467,10 +474,10 @@ SCENARIO("trie/store: unit tests", "[trie][unit-test]") {
 	}
 	GIVEN("about extension package, more") {
 		using describable_store = trie::trie_t<
-			trie::value_t, '/',
-			trie::extensions::description_holder<>,
-			trie::extensions::comment_holder<>,
-			trie::extensions::tag_holder<> >;
+		        trie::value_t, '/',
+		        trie::extensions::description_holder<>,
+		        trie::extensions::comment_holder<>,
+		        trie::extensions::tag_holder<>>;
 		describable_store ds;
 
 		ds.insert("app/home/ops", 1);
