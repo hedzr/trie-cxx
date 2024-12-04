@@ -1,5 +1,14 @@
 # trie-cxx and store-cxx
 
+trie-cxx is a c++20 header-only library, which implements a extensible Trie-tree container.
+
+## Features
+
+The released codes allowes the extras data attached to the Trie-tree nodes/leaves, such as data (with any type), comment, descriptions, and tags, etc..
+
+```cpp
+```
+
 ## For Developers
 
 ```bash
@@ -115,3 +124,7 @@ vcpkg install catch2:x64-windows
 ```
 
 If catch2 not installed via package manager, cmake will try downloading it from github and use it as a child target.
+
+## License
+
+Apache 2.0
