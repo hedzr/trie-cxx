@@ -49,27 +49,27 @@
 
 namespace trie {
 	using base_base_t = std::variant<
-		int, unsigned int, float, double, bool, std::string,
-		std::vector<int>, std::vector<unsigned int>, std::vector<float>,
-		std::vector<double>, std::vector<bool>, std::vector<std::string>,
-		std::valarray<int>, std::valarray<unsigned int>, std::vector<float>,
-		std::valarray<double> >;
+	        int, unsigned int, float, double, bool, std::string,
+	        std::vector<int>, std::vector<unsigned int>, std::vector<float>,
+	        std::vector<double>, std::vector<bool>, std::vector<std::string>,
+	        std::valarray<int>, std::valarray<unsigned int>, std::vector<float>,
+	        std::valarray<double>>;
 
 
 	using base_t = std::variant<
-		std::monostate,
-		bool, char, // unsigned char, wchar_t,
-		int, unsigned int, int8_t, int16_t, // int64_t == long long, // int32_t,
-		uint8_t, uint16_t, // uint32_t, // uint64_t = unsigned long long,
-		long, long long, unsigned long, unsigned long long,
-		float, double, long double,
-		std::chrono::duration<long double, std::ratio<60> >,
-		std::chrono::nanoseconds,
-		std::chrono::microseconds,
-		std::chrono::milliseconds,
-		std::chrono::seconds,
-		std::chrono::minutes,
-		std::chrono::hours,
+	        std::monostate,
+	        bool, char,                         // unsigned char, wchar_t,
+	        int, unsigned int, int8_t, int16_t, // int64_t == long long, // int32_t,
+	        uint8_t, uint16_t,                  // uint32_t, // uint64_t = unsigned long long,
+	        long, long long, unsigned long, unsigned long long,
+	        float, double, long double,
+	        std::chrono::duration<long double, std::ratio<60>>,
+	        std::chrono::nanoseconds,
+	        std::chrono::microseconds,
+	        std::chrono::milliseconds,
+	        std::chrono::seconds,
+	        std::chrono::minutes,
+	        std::chrono::hours,
 #if __cplusplus > 201703L
 	        std::chrono::days,
 	        std::chrono::weeks,
@@ -79,20 +79,20 @@ namespace trie {
 	        // std::chrono::time_zone,
 	        std::chrono::system_clock::time_point,
 #endif
-		std::byte,
+	        std::byte,
 
-		std::vector<int>,
-		std::vector<unsigned int>,
-		std::vector<float>,
-		std::vector<double>,
-		std::vector<bool>,
-		std::vector<std::string>,
+	        std::vector<int>,
+	        std::vector<unsigned int>,
+	        std::vector<float>,
+	        std::vector<double>,
+	        std::vector<bool>,
+	        std::vector<std::string>,
 
-		// std::tuple<T, ...>,
+	        // std::tuple<T, ...>,
 
-		char const *,
-		// wchar_t const *,
-		std::string>;
+	        char const *,
+	        // wchar_t const *,
+	        std::string>;
 
 
 	template<class>
@@ -103,7 +103,7 @@ namespace trie {
 	};
 
 	template<typename T, typename A>
-	struct is_std_vector<std::vector<T, A> > : std::true_type {
+	struct is_std_vector<std::vector<T, A>> : std::true_type {
 	};
 
 	template<typename>
@@ -111,17 +111,17 @@ namespace trie {
 	};
 
 	template<typename T, typename A>
-	struct is_std_list<std::list<T, A> > : std::true_type {
+	struct is_std_list<std::list<T, A>> : std::true_type {
 	};
 
 
 	template<typename T, typename FIX = char,
-		std::enable_if_t<is_std_vector<T>::value, bool>  = true>
+	         std::enable_if_t<is_std_vector<T>::value, bool> = true>
 	// requires(is_std_vector<T>)
 	inline std::ostream &list_to_string(std::ostream &os, T const &v, FIX prefix, FIX suffix) {
 		os << prefix;
 		int ix{0};
-		for (auto const &it: v) {
+		for (auto const &it : v) {
 			if (ix++ > 0) os << ',';
 			os << it;
 		}
@@ -144,11 +144,13 @@ namespace trie {
 	struct lite_ios_fmt_saver {
 		std::ostream &os;
 		std::ios_base::fmtflags f;
-		explicit lite_ios_fmt_saver(std::ostream &os = std::cout) : os(os), f(os.flags()) {}
+		explicit lite_ios_fmt_saver(std::ostream &os = std::cout)
+		    : os(os)
+		    , f(os.flags()) {}
 		~lite_ios_fmt_saver() { os.flags(f); }
 		explicit operator std::ostream &() const { return os; }
 		std::ostream &operator()() const { return os; }
-	};/* @formatter:on */
+	}; /* @formatter:on */
 
 	/**
 	 * @details while using std::setfill(anychar), ios_fmt_saver can restore
@@ -167,12 +169,13 @@ namespace trie {
 	 */
 	struct ios_fmt_saver {
 		std::ostream &os;
-		std::ios old_state{};
-		explicit ios_fmt_saver(std::ostream &os = std::cout) : os(os) { old_state.copyfmt(os); }
+		std::ios old_state{nullptr};
+		explicit ios_fmt_saver(std::ostream &os = std::cout)
+		    : os(os) { old_state.copyfmt(os); }
 		~ios_fmt_saver() { os.copyfmt(old_state); }
 		explicit operator std::ostream &() const { return os; }
 		std::ostream &operator()() const { return os; }
-	};/* @formatter:on */
+	}; /* @formatter:on */
 
 	// NOTE fixed fmtflags state after printed int8_t,...;
 	// added ios_fmt_saver;
@@ -180,78 +183,78 @@ namespace trie {
 		// std::stringstream os;
 
 		std::visit([&os](auto &&arg) {
-			           using T = std::decay_t<decltype(arg)>;
-			           if constexpr (std::is_same_v<T, bool>)
-				           os << std::boolalpha << arg;
-			           else if constexpr (std::is_same_v<T, char>)
-				           os << '\'' << arg << '\'';
-				           // else if constexpr (std::is_same_v<T, unsigned char>)
-				           // 	os << arg;
-				           // else if constexpr (std::is_same_v<T, wchar_t>)
-				           // 	os << arg;
-			           else if constexpr (std::is_same_v<T, int>)
-				           os << arg;
-			           else if constexpr (std::is_same_v<T, int8_t>)
-				           lite_ios_fmt_saver(os)() << '\'' << '\\' << 'x' << std::hex << (int) arg << '\'';
-			           else if constexpr (std::is_same_v<T, int16_t>)
-				           os << arg;
-				           // else if constexpr (std::is_same_v<T, int32_t>)
-				           // 	os << arg;
-			           else if constexpr (std::is_same_v<T, int64_t>)
-				           os << arg;
-			           else if constexpr (std::is_same_v<T, unsigned int>)
-				           os << arg;
-			           else if constexpr (std::is_same_v<T, uint8_t>)
-				           lite_ios_fmt_saver(os)() << '\'' << '\\' << 'x' << std::hex << (unsigned int) arg << '\'';
-			           else if constexpr (std::is_same_v<T, std::byte>)
-				           // os << (uint8_t) arg;
-				           lite_ios_fmt_saver(os)() << '\'' << '\\' << 'x' << std::hex << (unsigned int) arg << '\'';
-			           else if constexpr (std::is_same_v<T, uint16_t>)
-				           os << arg;
-			           else if constexpr (std::is_same_v<T, uint32_t>)
-				           os << arg;
-			           else if constexpr (std::is_same_v<T, uint64_t>)
-				           os << arg;
-			           else if constexpr (std::is_same_v<T, long>)
-				           os << arg;
-			           else if constexpr (std::is_same_v<T, long long>)
-				           os << arg;
-			           else if constexpr (std::is_same_v<T, unsigned long>)
-				           os << arg;
-			           else if constexpr (std::is_same_v<T, unsigned long long>)
-				           os << arg;
-			           else if constexpr (std::is_same_v<T, float>)
-				           os << std::setprecision(std::numeric_limits<float>::digits10) << arg;
-			           else if constexpr (std::is_same_v<T, double>)
-				           // os << std::setprecision(35) << arg;
-				           os << std::setprecision(std::numeric_limits<double>::digits10) << arg;
-			           else if constexpr (std::is_same_v<T, long double>)
-				           // os << std::setprecision(std::numeric_limits<long double>::max_digits10) << arg;
-				           os << std::setprecision(LDBL_DIG * 2) << arg;
-			           else if constexpr (std::is_same_v<T, std::string>)
-				           os << std::quoted(arg);
-			           else if constexpr (std::is_same_v<T, char *const>)
-				           os << std::quoted(arg);
-			           else if constexpr (std::is_same_v<T, char const *>)
-				           os << std::quoted(arg);
-				           // else if constexpr (std::is_same_v<T, wchar_t const *>)
-				           // 	os << std::quoted(arg);
-			           else if constexpr (std::is_same_v<T, std::chrono::duration<long double, std::ratio<60> > >)
-				           chrono::format_duration(os, arg);
-			           else if constexpr (std::is_same_v<T, std::chrono::duration<long long, std::ratio<60> > >)
-				           chrono::format_duration(os, arg);
-			           else if constexpr (std::is_same_v<T, std::chrono::nanoseconds>)
-				           chrono::format_duration(os, arg);
-			           else if constexpr (std::is_same_v<T, std::chrono::microseconds>)
-				           chrono::format_duration(os, arg);
-			           else if constexpr (std::is_same_v<T, std::chrono::milliseconds>)
-				           chrono::format_duration(os, arg);
-			           else if constexpr (std::is_same_v<T, std::chrono::seconds>)
-				           chrono::format_duration(os, arg);
-			           else if constexpr (std::is_same_v<T, std::chrono::minutes>)
-				           chrono::format_duration(os, arg);
-			           else if constexpr (std::is_same_v<T, std::chrono::hours>)
-				           chrono::format_duration(os, arg);
+			using T = std::decay_t<decltype(arg)>;
+			if constexpr (std::is_same_v<T, bool>)
+				os << std::boolalpha << arg;
+			else if constexpr (std::is_same_v<T, char>)
+				os << '\'' << arg << '\'';
+			// else if constexpr (std::is_same_v<T, unsigned char>)
+			// 	os << arg;
+			// else if constexpr (std::is_same_v<T, wchar_t>)
+			// 	os << arg;
+			else if constexpr (std::is_same_v<T, int>)
+				os << arg;
+			else if constexpr (std::is_same_v<T, int8_t>)
+				lite_ios_fmt_saver(os)() << '\'' << '\\' << 'x' << std::hex << (int) arg << '\'';
+			else if constexpr (std::is_same_v<T, int16_t>)
+				os << arg;
+			// else if constexpr (std::is_same_v<T, int32_t>)
+			// 	os << arg;
+			else if constexpr (std::is_same_v<T, int64_t>)
+				os << arg;
+			else if constexpr (std::is_same_v<T, unsigned int>)
+				os << arg;
+			else if constexpr (std::is_same_v<T, uint8_t>)
+				lite_ios_fmt_saver(os)() << '\'' << '\\' << 'x' << std::hex << (unsigned int) arg << '\'';
+			else if constexpr (std::is_same_v<T, std::byte>)
+				// os << (uint8_t) arg;
+				lite_ios_fmt_saver(os)() << '\'' << '\\' << 'x' << std::hex << (unsigned int) arg << '\'';
+			else if constexpr (std::is_same_v<T, uint16_t>)
+				os << arg;
+			else if constexpr (std::is_same_v<T, uint32_t>)
+				os << arg;
+			else if constexpr (std::is_same_v<T, uint64_t>)
+				os << arg;
+			else if constexpr (std::is_same_v<T, long>)
+				os << arg;
+			else if constexpr (std::is_same_v<T, long long>)
+				os << arg;
+			else if constexpr (std::is_same_v<T, unsigned long>)
+				os << arg;
+			else if constexpr (std::is_same_v<T, unsigned long long>)
+				os << arg;
+			else if constexpr (std::is_same_v<T, float>)
+				os << std::setprecision(std::numeric_limits<float>::digits10) << arg;
+			else if constexpr (std::is_same_v<T, double>)
+				// os << std::setprecision(35) << arg;
+				os << std::setprecision(std::numeric_limits<double>::digits10) << arg;
+			else if constexpr (std::is_same_v<T, long double>)
+				// os << std::setprecision(std::numeric_limits<long double>::max_digits10) << arg;
+				os << std::setprecision(LDBL_DIG * 2) << arg;
+			else if constexpr (std::is_same_v<T, std::string>)
+				os << std::quoted(arg);
+			else if constexpr (std::is_same_v<T, char *const>)
+				os << std::quoted(arg);
+			else if constexpr (std::is_same_v<T, char const *>)
+				os << std::quoted(arg);
+			// else if constexpr (std::is_same_v<T, wchar_t const *>)
+			// 	os << std::quoted(arg);
+			else if constexpr (std::is_same_v<T, std::chrono::duration<long double, std::ratio<60>>>)
+				chrono::format_duration(os, arg);
+			else if constexpr (std::is_same_v<T, std::chrono::duration<long long, std::ratio<60>>>)
+				chrono::format_duration(os, arg);
+			else if constexpr (std::is_same_v<T, std::chrono::nanoseconds>)
+				chrono::format_duration(os, arg);
+			else if constexpr (std::is_same_v<T, std::chrono::microseconds>)
+				chrono::format_duration(os, arg);
+			else if constexpr (std::is_same_v<T, std::chrono::milliseconds>)
+				chrono::format_duration(os, arg);
+			else if constexpr (std::is_same_v<T, std::chrono::seconds>)
+				chrono::format_duration(os, arg);
+			else if constexpr (std::is_same_v<T, std::chrono::minutes>)
+				chrono::format_duration(os, arg);
+			else if constexpr (std::is_same_v<T, std::chrono::hours>)
+				chrono::format_duration(os, arg);
 #if __cplusplus > 201703L
 			else if constexpr (std::is_same_v<T, std::chrono::days>)
 				chrono::format_duration(os, arg);
@@ -264,47 +267,47 @@ namespace trie {
 			else if constexpr (std::is_same_v<T, std::chrono::system_clock::time_point>)
 				os << chrono::format_time_point(arg);
 #endif
-			           else if constexpr (std::is_same_v<T, std::vector<bool> >)
-				           list_to_string(os, arg, '[', ']');
-			           else if constexpr (std::is_same_v<T, std::vector<int> >)
-				           list_to_string(os, arg, '[', ']');
-			           else if constexpr (std::is_same_v<T, std::vector<unsigned int> >)
-				           list_to_string(os, arg, '[', ']');
-			           else if constexpr (std::is_same_v<T, std::vector<int64_t> >)
-				           list_to_string(os, arg, '[', ']');
-			           else if constexpr (std::is_same_v<T, std::vector<uint64_t> >)
-				           list_to_string(os, arg, '[', ']');
-			           else if constexpr (std::is_same_v<T, std::vector<float> >)
-				           list_to_string(os, arg, '[', ']');
-			           else if constexpr (std::is_same_v<T, std::vector<double> >)
-				           list_to_string(os, arg, '[', ']');
-			           else if constexpr (std::is_same_v<T, std::vector<std::string> >)
-				           list_to_string(os, arg, '[', ']');
+			else if constexpr (std::is_same_v<T, std::vector<bool>>)
+				list_to_string(os, arg, '[', ']');
+			else if constexpr (std::is_same_v<T, std::vector<int>>)
+				list_to_string(os, arg, '[', ']');
+			else if constexpr (std::is_same_v<T, std::vector<unsigned int>>)
+				list_to_string(os, arg, '[', ']');
+			else if constexpr (std::is_same_v<T, std::vector<int64_t>>)
+				list_to_string(os, arg, '[', ']');
+			else if constexpr (std::is_same_v<T, std::vector<uint64_t>>)
+				list_to_string(os, arg, '[', ']');
+			else if constexpr (std::is_same_v<T, std::vector<float>>)
+				list_to_string(os, arg, '[', ']');
+			else if constexpr (std::is_same_v<T, std::vector<double>>)
+				list_to_string(os, arg, '[', ']');
+			else if constexpr (std::is_same_v<T, std::vector<std::string>>)
+				list_to_string(os, arg, '[', ']');
 
-				           // std::vector<int>, std::vector<uint>, std::vector<float>,
-				           //         std::vector<double>, std::vector<bool>, std::vector<std::string>,
+			// std::vector<int>, std::vector<uint>, std::vector<float>,
+			//         std::vector<double>, std::vector<bool>, std::vector<std::string>,
 
-			           else if constexpr (is_std_vector<T>::value) {
-				           os << '[';
-				           int ix{0};
-				           for (auto const &it: arg) {
-					           if (ix++ > 0) os << ',';
-					           variant_to_string(os, it); // os << it;
-				           }
-				           os << ']';
-			           } else if constexpr (is_std_list<T>::value) {
-				           os << '[' << '/';
-				           int ix{0};
-				           for (auto const &it: arg) {
-					           if (ix++ > 0) os << ',';
-					           variant_to_string(os, it); // os << it;
-				           }
-				           os << '/' << ']';
-			           } else if constexpr (std::is_same_v<T, std::monostate>)
-				           os << "<null>";
-			           else
-				           static_assert(always_false_v<T>, "non-exhaustive visitor!");
-		           },
+			else if constexpr (is_std_vector<T>::value) {
+				os << '[';
+				int ix{0};
+				for (auto const &it : arg) {
+					if (ix++ > 0) os << ',';
+					variant_to_string(os, it); // os << it;
+				}
+				os << ']';
+			} else if constexpr (is_std_list<T>::value) {
+				os << '[' << '/';
+				int ix{0};
+				for (auto const &it : arg) {
+					if (ix++ > 0) os << ',';
+					variant_to_string(os, it); // os << it;
+				}
+				os << '/' << ']';
+			} else if constexpr (std::is_same_v<T, std::monostate>)
+				os << "<null>";
+			else
+				static_assert(always_false_v<T>, "non-exhaustive visitor!");
+		},
 		           v);
 		return os;
 	}
@@ -493,27 +496,27 @@ namespace trie { namespace cross {
 #include <time.h>
 
 namespace trie {
-	namespace cross {
-		inline void setenv(const char *__name, const char *__value, int __overwrite = 1) {
-			::setenv(__name, __value, __overwrite);
-		}
-
-		inline time_t time(time_t *_t = nullptr) {
-			return std::time(_t);
-		}
-		inline struct tm *gmtime(time_t const *_t = nullptr) {
-			if (!_t) {
-				time_t const vt = time();
-				return std::gmtime(&vt);
-			}
-			return std::gmtime(_t);
-		}
-
-		template<class T>
-		inline T max(T a, T b) { return std::max(a, b); }
-		template<class T>
-		inline T min(T a, T b) { return std::min(a, b); }
+namespace cross {
+	inline void setenv(const char *__name, const char *__value, int __overwrite = 1) {
+		::setenv(__name, __value, __overwrite);
 	}
+
+	inline time_t time(time_t *_t = nullptr) {
+		return std::time(_t);
+	}
+	inline struct tm *gmtime(time_t const *_t = nullptr) {
+		if (!_t) {
+			time_t const vt = time();
+			return std::gmtime(&vt);
+		}
+		return std::gmtime(_t);
+	}
+
+	template<class T>
+	inline T max(T a, T b) { return std::max(a, b); }
+	template<class T>
+	inline T min(T a, T b) { return std::min(a, b); }
+}
 } // namespace trie::cross
 #endif
 
