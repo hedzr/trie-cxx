@@ -1,0 +1,7 @@
+# todo, wip
+
+option('tests', type: 'boolean', value: false, description: 'Build tests')
+option('docs', type: 'boolean', value: false, description: 'Build documentations')
+option('manual', type: 'boolean', value: false, description: 'Build manuals (and/or linux manpages)')
+option('examples', type: 'boolean', value: false, description: 'Build examples')
+# option('sites', type: 'boolean', value: false, description: 'Build websites')

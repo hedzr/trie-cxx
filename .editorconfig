@@ -42,11 +42,10 @@ indent_style = tab
 # ij_css_use_double_quotes = true
 # ij_css_value_alignment = do_not_align
 
-[*.{l,ll,lex,y,yy,yacc}]
+[*.{l,ll,lex,y,yy,yacc,lxx,yxx}]
 indent_style = tab
-# indent_size = 8
-# indent_style = tab
-# tab_width = 8
+indent_size = 2
+tab_width = 2
 # ij_visual_guides =
 # ij_goyacc_keep_indents_on_empty_lines = false
 

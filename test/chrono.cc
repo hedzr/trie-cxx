@@ -29,10 +29,10 @@ constexpr auto year = 31556952ll; // 格里高利历年的平均秒数
 void test_from_cppref() {
 	// https://zh.cppreference.com/w/cpp/chrono/duration
 
-	using shakes = std::chrono::duration<int, std::ratio<1, 100'000'000> >;
+	using shakes = std::chrono::duration<int, std::ratio<1, 100'000'000>>;
 	using jiffies = std::chrono::duration<int, std::centi>;
-	using microfortnights = std::chrono::duration<float, std::ratio<14 * 24 * 60 * 60, 1'000'000> >;
-	using nanocenturies = std::chrono::duration<float, std::ratio<100 * year, 1000'000'000> >;
+	using microfortnights = std::chrono::duration<float, std::ratio<14 * 24 * 60 * 60, 1'000'000>>;
+	using nanocenturies = std::chrono::duration<float, std::ratio<100 * year, 1000'000'000>>;
 
 	std::chrono::seconds sec(1);
 
@@ -40,16 +40,16 @@ void test_from_cppref() {
 
 	// 无精度损失的整数尺度转换：无转型
 	std::cout << '\t' << std::chrono::microseconds(sec).count() << " microseconds\n"
-			<< '\t' << shakes(sec).count() << " shakes\n"
-			<< '\t' << jiffies(sec).count() << " jiffies\n";
+	          << '\t' << shakes(sec).count() << " shakes\n"
+	          << '\t' << jiffies(sec).count() << " jiffies\n";
 
 	// 有精度损失的整数尺度转换：需要转型
 	std::cout << '\t' << std::chrono::duration_cast<std::chrono::minutes>(sec).count()
-			<< " minutes\n";
+	          << " minutes\n";
 
 	// 浮点尺度转换：无转型
 	std::cout << '\t' << microfortnights(sec).count() << " microfortnights\n"
-			<< '\t' << nanocenturies(sec).count() << " nanocenturies\n";
+	          << '\t' << nanocenturies(sec).count() << " nanocenturies\n";
 }
 
 void test_traits_is_duration() {
@@ -106,7 +106,8 @@ void test_cpp_style(std::chrono::system_clock::time_point &now, std::tm &now_tm)
 			std::cout << "Failure." << '\n';
 		else
 			std::cout << "Success." << '\n';
-	} {
+	}
+	{
 		using namespace std::chrono;
 		// Get current time with precision of milliseconds
 		auto now11 = time_point_cast<milliseconds>(now); // system_clock::now());
@@ -121,12 +122,13 @@ void test_cpp_style(std::chrono::system_clock::time_point &now, std::tm &now_tm)
 			std::cout << "Failure." << '\n';
 		else
 			std::cout << "Success." << '\n';
-	} {
+	}
+	{
 		// std::chrono::time_point< std::chrono::system_clock > now = std::chrono::system_clock::now();
 		auto duration = now.time_since_epoch();
 
 		/* UTC: -3:00 = 24 - 3 = 21 */
-		typedef std::chrono::duration<int, std::ratio_multiply<std::chrono::hours::period, std::ratio<21> >::type> Days;
+		typedef std::chrono::duration<int, std::ratio_multiply<std::chrono::hours::period, std::ratio<21>>::type> Days;
 
 		Days days = std::chrono::duration_cast<Days>(duration);
 		duration -= days;
@@ -167,22 +169,22 @@ void test_cpp_style(std::chrono::system_clock::time_point &now, std::tm &now_tm)
 		struct tm *aTime = localtime(&theTime);
 
 		std::cout << days.count() << " days since epoch or "
-				<< days.count() / 365.2524 << " years since epoch. The time is now "
-				<< aTime->tm_hour << ":"
-				<< minutes.count() << ":"
-				<< seconds.count() << ","
-				<< milliseconds.count() << ":"
-				<< microseconds.count() << ":"
-				<< nanoseconds.count() << '\n';
+		          << days.count() / 365.2524 << " years since epoch. The time is now "
+		          << aTime->tm_hour << ":"
+		          << minutes.count() << ":"
+		          << seconds.count() << ","
+		          << milliseconds.count() << ":"
+		          << microseconds.count() << ":"
+		          << nanoseconds.count() << '\n';
 	}
 
 	// std::cout << "date command: " << date_cmd << '\n';
 
 	using iom = trie::chrono::iom;
-	std::cout << iom::fmtflags::gmt << iom::fmtflags::ns << "time_point (ns): os << " << now << '\n';
-	std::cout << iom::fmtflags::gmt << iom::fmtflags::us << "time_point (us): os << " << now << '\n';
-	std::cout << iom::fmtflags::gmt << iom::fmtflags::ms << "time_point (ms): os << " << now << '\n';
-	std::cout << "std::tm:    os << " << now_tm << '\n';
+	std::cout << iom::fmtflags::gmt << iom::fmtflags::ns << "time_point (ns): " << now << '\n';
+	std::cout << iom::fmtflags::gmt << iom::fmtflags::us << "time_point (us): " << now << '\n';
+	std::cout << iom::fmtflags::gmt << iom::fmtflags::ms << "time_point (ms): " << now << '\n';
+	std::cout << "std::tm:    " << now_tm << '\n';
 
 	// {
 	//     std::chrono::high_resolution_clock::time_point nowh = std::chrono::high_resolution_clock::now();
@@ -191,7 +193,7 @@ void test_cpp_style(std::chrono::system_clock::time_point &now, std::tm &now_tm)
 
 	std::chrono::system_clock::time_point now2 = std::chrono::system_clock::now();
 	auto d = now2 - now;
-	std::cout << "duration:   os << " << d << '\n';
+	std::cout << "duration:   " << d << '\n';
 }
 
 void test_cpp_style(std::chrono::system_clock::time_point &now) {
@@ -212,7 +214,7 @@ void test_time_now() {
 	std::cout << iom::fmtflags::local << iom::fmtflags::ns << "time_point (clock): " << now1 << '\n';
 	std::cout << iom::fmtflags::local << iom::fmtflags::us << "time_point (clock): " << now1 << '\n';
 	std::cout << 1 << '\n'
-			<< '\n';
+	          << '\n';
 }
 
 template<class _Rep, class _Period>
@@ -223,23 +225,23 @@ void echo(std::chrono::duration<_Rep, _Period> d) {
 
 void test_format_duration() {
 	using namespace std::literals::chrono_literals; // c++14 or later
-	for (auto d: std::vector<std::chrono::duration<long double, std::ratio<60> > >{
-		     3ns,
-		     800ms,
-		     59.739us,
-		     0.75min,
-		     501ns,
-		     730us,
-		     233ms,
-		     7s,
-		     7.2s,
-		     1024h,
-		     5min,
-		     5.625min,
-		     89.843204843s, // 89s+843.204843ms
+	for (auto d : std::vector<std::chrono::duration<long double, std::ratio<60>>>{
+	             3ns,
+	             800ms,
+	             59.739us,
+	             0.75min,
+	             501ns,
+	             730us,
+	             233ms,
+	             7s,
+	             7.2s,
+	             1024h,
+	             5min,
+	             5.625min,
+	             89.843204843s, // 89s+843.204843ms
 
-		     5129ns,
-		     59.739us,
+	             5129ns,
+	             59.739us,
 	     }) {
 		echo(d);
 	}
@@ -248,12 +250,12 @@ void test_format_duration() {
 void test_try_parse_by() {
 	using Clock = std::chrono::system_clock;
 
-	for (auto &time_str: {
-		     "11:01:37",
+	for (auto &time_str : {
+	             "11:01:37",
 #if OS_WIN
 	             "1973-1-29 3:59:59", // MSVC: time point before 1970-1-1 is invalid
 #else
-		     "1937-1-29 3:59:59",
+	             "1937-1-29 3:59:59",
 #endif
 	     }) {
 		std::tm tm = trie::chrono::time_point_2_tm(Clock::now());
@@ -284,12 +286,12 @@ void test_last_day_at_this_month() {
 #define NOW_CASE(now_str, expected_str, desc, ofs) \
 	testcase { desc, ofs, chr::parse_datetime(now_str), chr::parse_datetime(expected_str) }
 
-	for (auto const &t: {
-		     // Month .. Year
-		     NOW_CASE("2021-08-05", "2021-08-29", "day -3", 3),
-		     NOW_CASE("2021-08-05", "2021-08-22", "day -10", 10),
-		     NOW_CASE("2021-08-05", "2021-08-17", "day -15", 15),
-		     NOW_CASE("2021-08-05", "2021-08-07", "day -25", 25),
+	for (auto const &t : {
+	             // Month .. Year
+	             NOW_CASE("2021-08-05", "2021-08-29", "day -3", 3),
+	             NOW_CASE("2021-08-05", "2021-08-22", "day -10", 10),
+	             NOW_CASE("2021-08-05", "2021-08-17", "day -15", 15),
+	             NOW_CASE("2021-08-05", "2021-08-07", "day -25", 25),
 
 	     }) {
 		auto now = t.now;
@@ -326,13 +328,13 @@ void test_last_day_at_this_year() {
 #define NOW_CASE(now_str, expected_str, desc, ofs) \
 	testcase { desc, ofs, chr::parse_datetime(now_str), chr::parse_datetime(expected_str) }
 
-	for (auto const &t: {
-		     // Month .. Year
-		     NOW_CASE("2021-08-05", "2021-12-29", "day -3", 3),
-		     NOW_CASE("2021-08-05", "2021-12-22", "day -10", 10),
-		     NOW_CASE("2021-08-05", "2021-12-17", "day -15", 15),
-		     NOW_CASE("2021-08-05", "2021-12-07", "day -25", 25),
-		     NOW_CASE("2021-08-05", "2021-1-1", "day -365", 365),
+	for (auto const &t : {
+	             // Month .. Year
+	             NOW_CASE("2021-08-05", "2021-12-29", "day -3", 3),
+	             NOW_CASE("2021-08-05", "2021-12-22", "day -10", 10),
+	             NOW_CASE("2021-08-05", "2021-12-17", "day -15", 15),
+	             NOW_CASE("2021-08-05", "2021-12-07", "day -25", 25),
+	             NOW_CASE("2021-08-05", "2021-1-1", "day -365", 365),
 
 	     }) {
 		auto now = t.now;
