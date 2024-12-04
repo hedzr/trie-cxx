@@ -23,7 +23,7 @@ namespace trie {
 #if defined(__GNUC__)
 	using errno_t = int;
 #endif
-}
+} // namespace trie
 
 // value_t
 namespace trie {
@@ -128,24 +128,24 @@ namespace trie::extensions {
 
 // ext_package
 namespace trie::extensions::detail {
-	template<typename DescT = extensions::void_desc, // use description_holder if u'd like
-		typename CommentT = extensions::void_comment, // use comment_holder if u'd like
-		typename TagT = extensions::void_tag> // use tag_holder if u'd like
+	template<typename DescT = extensions::void_desc,       // use description_holder if u'd like
+	         typename CommentT = extensions::void_comment, // use comment_holder if u'd like
+	         typename TagT = extensions::void_tag>         // use tag_holder if u'd like
 	struct [[maybe_unused]] ext_package
-			: public DescT
-			  , public CommentT
-			  , public TagT {
+	    : public DescT
+	    , public CommentT
+	    , public TagT {
 	};
 } // namespace trie::extensions::detail
 
 // store_node<>
 namespace trie {
 	template<typename ValueT,
-		char delimiter = '.',
-		typename DescT = extensions::void_desc, // use description_holder if u'd like
-		typename CommentT = extensions::void_comment, // use comment_holder if u'd like
-		typename TagT = extensions::void_tag, // use tag_holder if u'd like
-		typename ExtPkgT = extensions::detail::ext_package<DescT, CommentT, TagT> >
+	         char delimiter = '.',
+	         typename DescT = extensions::void_desc,       // use description_holder if u'd like
+	         typename CommentT = extensions::void_comment, // use comment_holder if u'd like
+	         typename TagT = extensions::void_tag,         // use tag_holder if u'd like
+	         typename ExtPkgT = extensions::detail::ext_package<DescT, CommentT, TagT>>
 	class store_node {
 	public:
 		enum NodeType {
@@ -162,7 +162,7 @@ namespace trie {
 		using comment_t = typename CommentT::comment_t;
 		using tag_t = typename TagT::tag_t;
 		using node_type = NodeType;
-		using node_ptr = node_t *; // std::shared_ptr<node_t>;
+		using node_ptr = node_t *;             // std::shared_ptr<node_t>;
 		using const_node_ptr = node_t const *; // std::shared_ptr<node_t const>;
 		// using weak_node_ptr = std::weak_ptr<node_t>;
 		// using const_weak_node_ptr = std::weak_ptr<node_t const>;
@@ -170,10 +170,10 @@ namespace trie {
 
 	private:
 		node_type _type{NODE_NONE}; // node type
-		std::string _path{}; // full path to this node
-		std::string _fragment{}; // path fragment
+		std::string _path{};        // full path to this node
+		std::string _fragment{};    // path fragment
 		std::size_t _fragment_length{0};
-		value_t _value{}; // the payload
+		value_t _value{};       // the payload
 		children_t _children{}; // children nodes
 		ext_pkg_t _pkg{};
 
@@ -216,6 +216,7 @@ namespace trie {
 
 		// pure trie-tree interfaces
 
+#if 0
 	public:
 		// auto insert(std::string const &path, value_t const &value) -> return_s; // insert or update
 		auto insert(std::string const &path, value_t &&value) -> return_s;
@@ -346,8 +347,9 @@ namespace trie {
 
 		auto fast_find(char const *path) -> find_return_s;
 		auto fast_find(char const *path) const -> const_find_return_s;
+#endif
 
 	}; // class store_node
-}
+} // namespace trie
 
 #endif //TRIE_CXX_TRIE_NODE_HH
