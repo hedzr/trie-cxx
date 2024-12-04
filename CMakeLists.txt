@@ -26,6 +26,8 @@ set(PROJECT_MACRO_SHORT_NAME trie)
 set(PROJECT_MACRO_MID_NAME trie-cxx)
 set(PROJECT_MACRO_PREFIX "TRIE")
 set_property(GLOBAL PROPERTY PROJECT_MAINTAINER "hedzr <hedzr@duck.com>")
+set_property(GLOBAL PROPERTY PROJ_HOMEPAGE "https://github.com/hedzr/trie-cxx")
+set_property(GLOBAL PROPERTY PROJ_REPO_URL "https://github.com/hedzr/trie-cxx")
 
 # ### OPTIONS ###########################################################
 
