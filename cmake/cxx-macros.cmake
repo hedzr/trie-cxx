@@ -622,7 +622,7 @@ macro (define_cxx_library_project name)
 		# #${PROJECT_MACRO_PREFIX}_UNIT_TEST=0
 		# #UNIT_TESTING=0
 		# )
-		# target_link_libraries(fsm_cxx INTERFACE debug_assert)
+		# target_link_libraries(proj_cxx INTERFACE debug_assert)
 		if (MSVC)
 			target_compile_options(${PROJ_NAME} INTERFACE /wd4800 # truncation to bool warning
 					/Zc:__cplusplus

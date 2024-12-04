@@ -206,7 +206,7 @@ class VersionExtractor:
 # # lookup xxx-version.hh in build/, cmake-build-debug/, ...
 # for dn in ["build", "cmake-build-*"]:
 #     if not ok:
-#         config_h = os.path.join(base_path, dn, "trie-cxx-version.hh")
+#         config_h = os.path.join(base_path, dn, "proj-cxx-version.hh")
 #         cfg_list = glob.glob(config_h)
 #         for filename in cfg_list:
 #             with open(filename, "r") as fp:

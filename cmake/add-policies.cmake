@@ -25,10 +25,6 @@ if (POLICY CMP0042)
 	cmake_policy(SET CMP0042 NEW)
 endif ()
 
-if (POLICY CMP0048)
-	cmake_policy(SET CMP0048 NEW)
-endif ()
-
 # Project version variables are the empty string if version is unspecified
 if (POLICY CMP0048)
 	cmake_policy(SET CMP0048 NEW)
@@ -82,6 +78,11 @@ endif (POLICY CMP0091)
 if (POLICY CMP0120)
 	cmake_policy(SET CMP0120 NEW) # The WriteCompilerDetectionHeader module is removed
 endif ()
+
+if (POLICY CMP0068)
+    cmake_policy(SET CMP0068 NEW)
+endif ()
+
 
 if ("${CMAKE_VERSION}" VERSION_LESS "3.12")
 	cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})

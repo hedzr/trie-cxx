@@ -85,8 +85,8 @@ define_cxx_library_project(${PROJECT_NAME}
 
     HEADERS
     #   ${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_MACRO_NAME}-all.hh
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-version.hh
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.hh
+    ${CMAKE_GENERATED_DIR}/${PROJECT_NAME}-version.hh
+    ${CMAKE_GENERATED_DIR}/${PROJECT_NAME}-config.hh
     ${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_MACRO_MID_NAME}/${PROJECT_MACRO_SHORT_NAME}-all.hh
 )
 message(STATUS "---- defined ${PROJECT_NAME} / ${PROJECT_MACRO_NAME} ------------")
