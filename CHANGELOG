@@ -1,3 +1,4 @@
 # CHANGELOG
 
+- v0.3.1 - compiling passed under macOS (clang), Linux (gcc-13) and Windows (msvc)
 - v0.3.0 - first public pre-release

@@ -35,6 +35,10 @@ These codes are and will be released under Apache 2.0 for free. So referring to 
 
 ## For Developers
 
+`trie-cxx` needs a c++-20 compliant compiler such as gcc-13.
+
+From v0.3.1, `trie-cxx` was compiled passed under macOS (clang), Linux (gcc-13) and Windows (msvc).
+
 ```bash
 ```
 
