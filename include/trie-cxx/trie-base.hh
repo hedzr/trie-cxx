@@ -144,8 +144,8 @@ namespace trie {
 	struct lite_ios_fmt_saver {
 		std::ostream &os;
 		std::ios_base::fmtflags f;
-		explicit lite_ios_fmt_saver(std::ostream &os = std::cout)
-		    : os(os)
+		explicit lite_ios_fmt_saver(std::ostream &os_ = std::cout)
+		    : os(os_)
 		    , f(os.flags()) {}
 		~lite_ios_fmt_saver() { os.flags(f); }
 		explicit operator std::ostream &() const { return os; }
@@ -170,8 +170,8 @@ namespace trie {
 	struct ios_fmt_saver {
 		std::ostream &os;
 		std::ios old_state{nullptr};
-		explicit ios_fmt_saver(std::ostream &os = std::cout)
-		    : os(os) { old_state.copyfmt(os); }
+		explicit ios_fmt_saver(std::ostream &os_ = std::cout)
+		    : os(os_) { old_state.copyfmt(os); }
 		~ios_fmt_saver() { os.copyfmt(old_state); }
 		explicit operator std::ostream &() const { return os; }
 		std::ostream &operator()() const { return os; }
@@ -195,7 +195,7 @@ namespace trie {
 			else if constexpr (std::is_same_v<T, int>)
 				os << arg;
 			else if constexpr (std::is_same_v<T, int8_t>)
-				lite_ios_fmt_saver(os)() << '\'' << '\\' << 'x' << std::hex << (int) arg << '\'';
+				(lite_ios_fmt_saver(os)()) << '\'' << '\\' << 'x' << std::hex << (int) arg << '\'';
 			else if constexpr (std::is_same_v<T, int16_t>)
 				os << arg;
 			// else if constexpr (std::is_same_v<T, int32_t>)
@@ -205,10 +205,10 @@ namespace trie {
 			else if constexpr (std::is_same_v<T, unsigned int>)
 				os << arg;
 			else if constexpr (std::is_same_v<T, uint8_t>)
-				lite_ios_fmt_saver(os)() << '\'' << '\\' << 'x' << std::hex << (unsigned int) arg << '\'';
+				(lite_ios_fmt_saver(os)()) << '\'' << '\\' << 'x' << std::hex << (unsigned int) arg << '\'';
 			else if constexpr (std::is_same_v<T, std::byte>)
 				// os << (uint8_t) arg;
-				lite_ios_fmt_saver(os)() << '\'' << '\\' << 'x' << std::hex << (unsigned int) arg << '\'';
+				(lite_ios_fmt_saver(os)()) << '\'' << '\\' << 'x' << std::hex << (unsigned int) arg << '\'';
 			else if constexpr (std::is_same_v<T, uint16_t>)
 				os << arg;
 			else if constexpr (std::is_same_v<T, uint32_t>)
