@@ -36,10 +36,11 @@ jobs:
             name: "Ubuntu Latest GCC", artifact: "Linux.7z",
             os: ubuntu-latest,
             cc: "gcc-12", cxx: "g++-12" # for 22.04, gcc-10, 11, 12 are valid.
+              # cc: "gcc-13", cxx: "g++-13"
+              # cc: "gcc-14", cxx: "g++-14"
 
-            # now it's 22.04, at 2024-10-01,
-            # https://github.com/actions/runner-images/blob/macos-14-arm64/20240827.4/images/ubuntu/Ubuntu2204-Readme.md
-            # https://github.com/actions/runner-images/blob/macos-14-arm64/20240827.4/images/ubuntu/Ubuntu2404-Readme.md
+              # https://github.com/actions/runner-images/blob/macos-14-arm64/20240827.4/images/ubuntu/Ubuntu2204-Readme.md
+              # https://github.com/actions/runner-images/blob/macos-14-arm64/20240827.4/images/ubuntu/Ubuntu2404-Readme.md
           }
           - {
             name: "macOS Latest Arm64", artifact: "macOS.7z",
@@ -49,28 +50,34 @@ jobs:
               # https://github.com/actions/runner-images/blob/macos-14-arm64/20240827.4/images/macos/macos-14-arm64-Readme.md
               # https://github.com/actions/runner-images/releases/tag/macos-14-arm64%2F20240827.4
           }
-          #- {
-          #  name: "macOS Latest Intel", artifact: "macOS-intel.7z",
-          #  os: macos-latest-large,
-          #  cc: "clang", cxx: "clang++"
+          # macOS Latest Intel not support in free plan
+          # - {
+          #   name: "macOS Latest Intel", artifact: "macOS-intel.7z",
+          #   os: macos-latest-large,
+          #   cc: "clang", cxx: "clang++"
           #
-          #    # https://github.com/actions/runner-images
-          #}
+          #     # https://github.com/actions/runner-images
+          # }
+
 
     steps:
       - uses: actions/checkout@v1
 
-      # - name: Install gcc 10+ for Ubuntu-18
-      #   #if: matrix.os == 'ubuntu-latest'
-      #   if: runner.os == 'Linux' # Linux, Windows, macOS
-      #   run: |
-      #     # if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-      #     if [[ "$(gcc --version|head -1)" != *10.* ]]; then
-      #       sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-      #       sudo apt update
-      #       sudo apt install -y gcc-10 g++-10
-      #     fi
-      #     # fi
+      - name: Install gcc 10+ for Ubuntu-18
+        #if: matrix.os == 'ubuntu-latest'
+        if: runner.os == 'Linux' # Linux, Windows, macOS
+        run: |
+          which gcc && gcc --version
+          which cmake && cmake --version
+          echo
+          echo
+          # if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+          if [[ "$(gcc --version|head -1)" != *10.* ]]; then
+            sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+            sudo apt update
+            sudo apt install -y gcc-10 g++-10
+          fi
+          # fi
 
 
       - name: Download Ninja and CMake
@@ -359,11 +366,15 @@ jobs:
     if: contains(github.ref, 'tags/v')
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      contents: write
+      discussions: write
 
     steps:
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1.0.0
+        uses: softprops/action-gh-release@v2
+        # if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -371,6 +382,7 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
+          generate_release_notes: true
 
       - name: Store Release url
         run: |
@@ -406,7 +418,7 @@ jobs:
           - {
             name: "Ubuntu Latest GCC", artifact: "Linux.7z",
             os: ubuntu-latest,
-            cc: "gcc-12", cxx: "g++-12"
+            cc: "gcc-14", cxx: "g++-14"
 
               # https://github.com/actions/runner-images/blob/macos-14-arm64/20240827.4/images/ubuntu/Ubuntu2404-Readme.md
           }
@@ -418,13 +430,14 @@ jobs:
               # https://github.com/actions/runner-images/blob/macos-14-arm64/20240827.4/images/macos/macos-14-arm64-Readme.md
               # https://github.com/actions/runner-images/releases/tag/macos-14-arm64%2F20240827.4
           }
-          #- {
-          #  name: "macOS Latest Intel", artifact: "macOS-intel.7z",
-          #  os: macos-latest-large,
-          #  cc: "clang", cxx: "clang++"
+          # - {
+          #   name: "macOS Latest Intel", artifact: "macOS-intel.7z",
+          #   os: macos-latest-large,
+          #   cc: "clang", cxx: "clang++"
           #
-          #    # https://github.com/actions/runner-images
-          #}
+          #     # https://github.com/actions/runner-images
+          # }
+
 
     steps:
       - name: Download artifact
