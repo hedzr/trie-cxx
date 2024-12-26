@@ -15,6 +15,9 @@
 //
 
 #include <random>
+#include <cstdint>
+#include <cstddef>
+#include <stdint.h>
 
 // #include "trie-cxx/trie-base.hh"
 // #include "trie-cxx/trie-chrono.hh"
