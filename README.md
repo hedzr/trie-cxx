@@ -1,6 +1,11 @@
 # trie-cxx and store-cxx
 
-trie-cxx is a c++20 header-only library, which implements a extensible Trie-tree container.
+[![CMake Build Matrix](https://github.com/hedzr/trie-cxx/actions/workflows/cmake.yml/badge.svg)](https://github.com/hedzr/trie-cxx/actions/workflows/cmake.yml)
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/hedzr/trie-cxx.svg?label=release)](https://github.com/hedzr/trie-cxx/releases)
+
+`trie-cxx` is a c++20 header-only library, which implements a extensible Trie-tree container.
+
+`trie-cxx` allows accessing the target node data via a dotted key path. This is almost a in-memory key-value store.
 
 ## Features
 
