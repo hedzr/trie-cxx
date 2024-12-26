@@ -38,6 +38,10 @@
 //   https://dannorth.net/introducing-bdd/
 
 
+#if !defined(M_PI)
+#define M_PI        3.14159265358979323846264338327950288   /* pi             */
+#endif
+
 namespace trie::tests {
 	inline auto build_minimal_trie() -> trie::trie_t<trie::value_t> {
 		trie::trie_t<trie::value_t> tt;
