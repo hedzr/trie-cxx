@@ -465,7 +465,7 @@ namespace trie {
 #include <time.h>
 namespace trie { namespace cross {
 	inline void setenv(const char *__name, const char *__value, int __overwrite = 1) {
-		UNUSED(__overwrite);
+		(void)(__overwrite);
 		std::ostringstream os;
 		os << __name << '=' << __value;
 		(void) _putenv(os.str().c_str());
