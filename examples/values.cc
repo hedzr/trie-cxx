@@ -88,6 +88,15 @@ auto test_value_t() -> void {
 	TRY_VALUE_T(s2);
 }
 
-int main(__unused int argc, __unused char *argv[]) {
+#if __clang__
+#define UNUSED_PARAM __unused
+#define UNUSED __attribute__((unused))
+#else
+#define UNUSED_PARAM
+#define UNUSED(x) (void)(x)
+#endif
+
+int main(UNUSED_PARAM int argc, UNUSED_PARAM char *argv[]) {
 	test_value_t();
+	UNUSED(argc);UNUSED(argv);
 }
