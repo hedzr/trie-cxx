@@ -690,7 +690,13 @@ set(${PROJ_NAME}_LIBRARIES ${PROJ_NAME})
                 DESTINATION include
                 FILES_MATCHING PATTERN "${PROJ_PREFIX}*.hh")
 
-            install(FILES ${_lib_inc_prefix}.hh DESTINATION include)
+            if (EXISTS ${_lib_inc_prefix}.hh)
+                install(FILES ${_lib_inc_prefix}.hh DESTINATION include)
+                message(STATUS "[${PROJ_NAME}] install header file: ${_lib_inc_prefix}.hh")
+            elseif (EXISTS ${_lib_inc_prefix}-cxx.hh)
+                install(FILES ${_lib_inc_prefix}-cxx.hh DESTINATION include)
+                message(STATUS "[${PROJ_NAME}] install header file: ${_lib_inc_prefix}-cxx.hh")
+            endif ()
 
             install(FILES
                 ${CMAKE_CURRENT_BINARY_DIR}/${PROJ_NAME}-config.cmake
