@@ -20,6 +20,15 @@
 
 #include <thread>
 
+#if __clang__
+#define UNUSED_PARAM __unused
+// #define UNUSED __attribute__((unused))
+#define UNUSED(x) (void)(x)
+#else
+#define UNUSED_PARAM
+#define UNUSED(x) (void)(x)
+#endif
+
 // #include <stdio.h>
 // #include <stdlib.h>
 // #define dbg_print printf

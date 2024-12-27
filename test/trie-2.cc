@@ -377,10 +377,12 @@ SCENARIO("trie/store: remove a branch node", "[trie][remove][remove-branch]") {
 	auto tt = build_minimal_trie(); // these common codes will be re-exec'd before each GIVEN starting
 
 	GIVEN("a test store") {
-		std::printf("tt.size = %ld\n", tt.size());
+		// std::printf("tt.size = %zu\n", tt.size());
+		std::cout << "tt.size = " << tt.size() << '\n';
 		REQUIRE(tt.size() >= 8);
 
-		std::printf("tt.has(app.logging) = %d\n", tt.has("app.logging"));
+		// std::printf("tt.has(app.logging) = %d\n", tt.has("app.logging"));
+		std::cout << "tt.has(app.logging) = " << std::boolalpha << tt.has("app.logging") << '\n';
 		REQUIRE(tt.has("app.logging"));
 		REQUIRE(tt.has("app.logging."));
 		REQUIRE(tt.has("app.logging.file"));
@@ -392,11 +394,13 @@ SCENARIO("trie/store: unit tests", "[trie][unit-test]") {
 	auto tt = build_minimal_trie(); // these common codes will be re-exec'd before each GIVEN starting
 	using trie_t = decltype(tt);
 
-	std::printf("tt.size = %ld\n", tt.size());
+	// std::printf("tt.size = %zu\n", tt.size());
+	std::cout << "tt.size = " << tt.size() << '\n';
 	REQUIRE(tt.size() == 8);
 
 	GIVEN("a test store") {
-		std::printf("tt.has(app.logging) = %d\n", tt.has("app.logging"));
+		// std::printf("tt.has(app.logging) = %d\n", tt.has("app.logging"));
+		std::cout << "tt.has(app.logging) = " << std::boolalpha << tt.has("app.logging") << '\n';
 		REQUIRE(tt.has("app.logging"));
 		REQUIRE(tt.has("app.logging."));
 		REQUIRE(tt.has("app.logging.file"));

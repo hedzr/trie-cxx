@@ -1,14 +1,14 @@
 project(test
-    VERSION ${VERSION}
-    DESCRIPTION "tests - test apps for cxx20 library"
-    LANGUAGES C CXX)
+		VERSION ${VERSION}
+		DESCRIPTION "tests - test apps for cxx20 library"
+		LANGUAGES C CXX)
 
 set(PROJECT_ARCHIVE_NAME ${PROJECT_NAME}s-${PROJECT_VERSION})
 set(PROJECT_PREFIX "${PROJECT_NAME}") # prefix for the target executables
-if(ENABLE_TESTS)
-    # include(deps_inc_catch2)
-    # include(deps_inc_fmt)
-endif()
+if (ENABLE_TESTS)
+	# include(deps_inc_catch2)
+	# include(deps_inc_fmt)
+endif ()
 
 # set(USE_DEBUG ON) # to enable XXX_ENABLE_ASSERTIONS, XXX_ENABLE_THREAD_POOL_READY_SIGNAL, ...
 # set(USE_DEBUG OFF)
@@ -22,58 +22,60 @@ enable_sanitizer_for_multi_config()
 
 set(CMAKE_VERBOSE_MAKEFILE ON) # print compiling command-line before executing it, for cmake debugging only
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # export all commands into a json file (compile_commands.json)
-if(ENABLE_TESTS)
+if (ENABLE_TESTS)
+	
+	define_test_program(new new.cc
+			LIBRARIES Threads::Threads
+			CXXDEFINITIONS Y1=1 Y2
+	)
+	
+	define_test_program(chrono chrono.cc
+			LIBRARIES libs::trie # Catch2::Catch2WithMain
+			# CXXFLAGS -DTRIE_UNIT_TEST=1 -DTRIE_TEST_THREAD_POOL_DBGOUT=1
+	)
+	
+	# define_test_program(process process.cc
+	#     LIBRARIES libs::trie # Catch2::Catch2WithMain
+	# )
 
-    define_test_program(new new.cc
-        LIBRARIES Threads::Threads
-        CXXDEFINITIONS Y1=1 Y2
-    )
-
-    define_test_program(chrono chrono.cc
-        LIBRARIES libs::trie # Catch2::Catch2WithMain
-        # CXXFLAGS -DTRIE_UNIT_TEST=1 -DTRIE_TEST_THREAD_POOL_DBGOUT=1
-    )
-
-    # define_test_program(process process.cc
-    #     LIBRARIES libs::trie # Catch2::Catch2WithMain
-    # )
-
-endif()
+endif ()
 
 # ######## catch2
 
-if(ENABLE_TESTS)
+if (ENABLE_TESTS)
+	
+	define_test_program(catch2-demo catch2-demo.cc
+			LIBRARIES libs::trie Catch2::Catch2WithMain
+			CXXSTANDARD 11
+			
+			# CXXDEFINITIONS CATCH_CONFIG_MAIN YES=1
+	)
 
-    define_test_program(catch2-demo catch2-demo.cc
-        LIBRARIES libs::trie Catch2::Catch2WithMain
-        CXXSTANDARD 11
-
-        # CXXDEFINITIONS CATCH_CONFIG_MAIN YES=1
-    )
-
-endif()
+endif ()
 
 # ######### trie, ac automate machine
 
-if(ENABLE_TESTS)
+if (ENABLE_TESTS)
+	
+	if (NOT WIN32)
+		# word frequency summarizer
+		define_test_program(trie-1 trie-1.cc catch2-imp.cc
+				LIBRARIES libs::trie Catch2::Catch2WithMain
+				CXXSTANDARD 20
+		)
+	endif ()
+	
+	# store, hedzr/store (Golang) in c++, store-cxx
+	define_test_program(trie-2 trie-2.cc catch2-imp.cc
+			LIBRARIES libs::trie Catch2::Catch2WithMain
+			CXXSTANDARD 20
+	)
 
-    # word frequency summarizer
-    define_test_program(trie-1 trie-1.cc catch2-imp.cc
-        LIBRARIES libs::trie Catch2::Catch2WithMain
-        CXXSTANDARD 20
-    )
-
-    # store, hedzr/store (Golang) in c++, store-cxx
-    define_test_program(trie-2 trie-2.cc catch2-imp.cc
-        LIBRARIES libs::trie Catch2::Catch2WithMain
-        CXXSTANDARD 20
-    )
-
-endif()
+endif ()
 
 define_test_program(trie-2-test trie-2-main.cc
-    LIBRARIES libs::trie
-    CXXSTANDARD 20
+		LIBRARIES libs::trie
+		CXXSTANDARD 20
 )
 
 # # cannot work on a INTERFACE library target
