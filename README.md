@@ -44,18 +44,15 @@ These codes are and will be released under Apache 2.0 for free. So referring to 
 
 From v0.3.1, `trie-cxx` was compiled passed under macOS (clang), Linux (gcc-13) and Windows (msvc).
 
-```bash
-```
-
 ### CMake Standard
 
-cmdr-cxx is findable via CMake Modules.
+trie-cxx is findable via CMake Modules.
 
-You could install cmdr-cxx manually:
+You could install trie-cxx manually:
 
 ```bash
-git clone https://github.com/hedzr/cmdr-cxx.git
-cd cmdr-cxx
+git clone https://github.com/hedzr/trie-cxx.git
+cd trie-cxx
 cmake -DCMAKE_VERBOSE_DEBUG=ON -DCMAKE_AUTOMATE_TESTS=OFF -S . -B build/ -G Ninja
 # Or:
 #    cmake -S . -B build/
@@ -123,7 +120,7 @@ if (ev1 && (*ev1 == '0' || *ev1 == '1'))
 
 ### Preparing Catch2 v3.x
 
-for testing, catch2 v3.x is necessary.
+for testing, catch2 v3.7+ is necessary.
 
 openSUSE,
 
