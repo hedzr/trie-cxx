@@ -131,7 +131,7 @@ sudo zypper install catch2-devel # don't install catch2-2-devel
 Ubuntu 22.04/24.04,
 
 ```bash
-git clone -b v3.0.1 https://github.com/catchorg/Catch2.git
+git clone -b v3.7.1 https://github.com/catchorg/Catch2.git
 cd Catch2
 mkdir build
 cmake -S . -B build
