@@ -1,3 +1,4 @@
+*.sav/
 _build/
 _msvc_build/
 .idea/
