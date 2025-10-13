@@ -45,7 +45,7 @@ set(${PROJECT_MACRO_CLI_PREFIX}_libs
 get_filename_component(INCDIR ${CMAKE_CURRENT_SOURCE_DIR}/include ABSOLUTE)
 
 message(STATUS "---- define ${PROJECT_NAME} / ${PROJECT_MACRO_CLI_NAME} ------------")
-define_cxx_executable_project(${PROJECT_MACRO_CLI_NAME}
+define_cxx_executable_target(${PROJECT_MACRO_CLI_NAME}
     PREFIX ${PROJECT_MACRO_CLI_PREFIX}
     LIBRARIES ${${PROJECT_MACRO_CLI_PREFIX}_libs}
     SOURCES ${${PROJECT_MACRO_CLI_PREFIX}_source_files}
