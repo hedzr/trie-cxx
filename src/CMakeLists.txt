@@ -42,14 +42,20 @@ set(${PROJECT_MACRO_CLI_PREFIX}_libs
     libs::trie
 )
 
-get_filename_component(INCDIR ${CMAKE_CURRENT_SOURCE_DIR}/include ABSOLUTE)
+# get_filename_component(INCDIR ${CMAKE_CURRENT_SOURCE_DIR}/include ABSOLUTE)
+# get_filename_component(INCDIR_ROOT ${CMAKE_SOURCE_DIR}/include ABSOLUTE)
+# debug_print_value(INCDIR)
+# debug_print_value(INCDIR_ROOT)
+message(STATUS "INCDIR_ROOT <-------- ${CMAKE_SOURCE_DIR}/include")
+
 
 message(STATUS "---- define ${PROJECT_NAME} / ${PROJECT_MACRO_CLI_NAME} ------------")
 define_cxx_executable_target(${PROJECT_MACRO_CLI_NAME}
     PREFIX ${PROJECT_MACRO_CLI_PREFIX}
     LIBRARIES ${${PROJECT_MACRO_CLI_PREFIX}_libs}
     SOURCES ${${PROJECT_MACRO_CLI_PREFIX}_source_files}
-    INCLUDE_DIRECTORIES ${INCDIR}
+    # INCLUDE_DIRECTORIES "${INCDIR};${INCDIC_ROOT};${CMAKE_SOURCE_DIR}/include"
+    INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/include"
 )
 enable_version_increaser(${PROJECT_MACRO_CLI_NAME} ${PROJECT_MACRO_NAME} ${PROJECT_MACRO_SHORT_NAME} ${PROJECT_MACRO_PREFIX})
 message(STATUS "---- defined ${PROJECT_NAME} / ${PROJECT_MACRO_CLI_NAME} -----------")
