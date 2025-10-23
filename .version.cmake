@@ -1,2 +1,2 @@
-FILE(READ ".build-serial" BUILD_SERIAL)
+file(READ ".build-serial" BUILD_SERIAL)
 set(VERSION 0.3.1.${BUILD_SERIAL})
