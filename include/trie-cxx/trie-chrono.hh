@@ -116,21 +116,21 @@ namespace trie::chrono {
 
 	template<typename T>
 	struct is_duration<
-				T,
-				std::conditional_t<
-					false,
-					is_duration_helper<
-						typename T::rep,
-						typename T::period,
-						decltype(std::declval<T>().count()),
-						decltype(std::declval<T>().zero())
+	        T,
+	        std::conditional_t<
+	                false,
+	                is_duration_helper<
+	                        typename T::rep,
+	                        typename T::period,
+	                        decltype(std::declval<T>().count()),
+	                        decltype(std::declval<T>().zero())
 #ifndef _WIN32
-						,
-						decltype(std::declval<T>().min()),
-						decltype(std::declval<T>().max())
+	                                ,
+	                        decltype(std::declval<T>().min()),
+	                        decltype(std::declval<T>().max())
 #endif
-					>,
-					void> > : public std::true_type {
+	                        >,
+	                void>> : public std::true_type {
 	};
 
 	template<typename T>
@@ -177,7 +177,7 @@ namespace trie::chrono {
 	public:
 		static clock now() { return clock(); }
 		clock()
-			: _now(std::chrono::system_clock::now()) {
+		    : _now(std::chrono::system_clock::now()) {
 			// struct timespec ts;
 			// clock_gettime(CLOCK_REALTIME, &ts);
 			// _nsec = ts.tv_nsec;
@@ -202,11 +202,10 @@ namespace trie::chrono {
 			std::tuple<Durations...> retval;
 			using discard = int[];
 			(void) discard{
-				0, (void((
-					    (std::get<Durations>(retval) = std::chrono::duration_cast<Durations>(d)),
-					    (d -= std::chrono::duration_cast<DurationIn>(std::get<Durations>(retval))))),
-				    0)...
-			};
+			        0, (void((
+			                    (std::get<Durations>(retval) = std::chrono::duration_cast<Durations>(d)),
+			                    (d -= std::chrono::duration_cast<DurationIn>(std::get<Durations>(retval))))),
+			            0)...};
 			return retval;
 		}
 	} // namespace detail
@@ -241,8 +240,8 @@ namespace trie::chrono {
 	class high_res_duration {
 	public:
 		high_res_duration(std::function<bool(std::chrono::high_resolution_clock::duration duration)> const &fn = nullptr)
-			: _then(std::chrono::high_resolution_clock::now())
-			  , _cb(fn) {
+		    : _then(std::chrono::high_resolution_clock::now())
+		    , _cb(fn) {
 		}
 		~high_res_duration() {
 			_now = std::chrono::high_resolution_clock::now();
@@ -263,7 +262,7 @@ namespace trie::chrono {
 		}
 
 		template<typename T,
-			std::enable_if_t<trie::chrono::is_duration<T>::value, bool>  = true>
+		         std::enable_if_t<trie::chrono::is_duration<T>::value, bool> = true>
 		void print_duration(std::ostream &os, T v);
 
 	private:
@@ -373,11 +372,11 @@ namespace trie::chrono {
 
 	private:
 		static fmtflags _flags; // 0:ms, 1:us, 2:ns
-		// static int gmt_or_local; //0:gmt, 1:local
+		                        // static int gmt_or_local; //0:gmt, 1:local
 	};
 
 	inline iom::fmtflags iom::_flags = static_cast<fmtflags>(
-		(unsigned int) iom::fmtflags::gmt_or_local | (unsigned int) iom::fmtflags::us);
+	        (unsigned int) iom::fmtflags::gmt_or_local | (unsigned int) iom::fmtflags::us);
 } // namespace trie::chrono
 
 inline std::ostream &operator<<(std::ostream &os, const trie::chrono::iom::fmtflags v) {
@@ -395,7 +394,7 @@ namespace trie::chrono {
 #if __cplusplus > 201703L
 		auto d = std::chrono::duration_cast<std::chrono::days>(ns);
 #else
-		typedef std::chrono::duration<long, std::ratio<86400> > days;
+		typedef std::chrono::duration<long, std::ratio<86400>> days;
 		auto d = std::chrono::duration_cast<days>(ns);
 #endif
 		ns -= d;
@@ -421,7 +420,7 @@ namespace trie::chrono {
 	// }
 
 	template<class Duration,
-		std::enable_if_t<is_duration<Duration>::value, bool>  = true>
+	         std::enable_if_t<is_duration<Duration>::value, bool> = true>
 	inline std::ostream &format_duration(std::ostream &os, Duration const &timeunit) {
 		using namespace std;
 		using namespace std::chrono;
@@ -429,7 +428,7 @@ namespace trie::chrono {
 		// std::ostringstream os;
 		bool foundNonZero = false;
 		os.fill('0');
-		typedef duration<int, std::ratio<86400 * 365> > years_;
+		typedef duration<int, std::ratio<86400 * 365>> years_;
 		const auto y = duration_cast<years_>(ns);
 		bool overs{};
 		if (y.count()) {
@@ -438,7 +437,7 @@ namespace trie::chrono {
 			ns -= y;
 			overs = true;
 		}
-		typedef duration<int, std::ratio<86400> > days_;
+		typedef duration<int, std::ratio<86400>> days_;
 		const auto d = duration_cast<days_>(ns);
 		if (d.count()) {
 			foundNonZero = true;
@@ -521,10 +520,10 @@ namespace trie::chrono {
 		if (z1 || z2 || z3) {
 			if (z3)
 				os << (zdot1
-					       ? "ms"
-					       : zdot2
-						         ? "us"
-						         : "ns");
+				               ? "ms"
+				       : zdot2
+				               ? "us"
+				               : "ns");
 			else if (z2)
 				os << (zdot1 ? "ms" : "us");
 			else
@@ -534,7 +533,7 @@ namespace trie::chrono {
 	}
 
 	template<class Duration,
-		std::enable_if_t<is_duration<Duration>::value, bool>  = true>
+	         std::enable_if_t<is_duration<Duration>::value, bool> = true>
 	inline std::string format_duration(Duration const &timeunit) {
 		std::stringstream ss;
 		format_duration(ss, timeunit);
@@ -627,8 +626,8 @@ namespace trie::chrono {
 			return os;
 		std::tm *tm;
 		if (iom_::has(iom_::fmtflags::gmt_or_local))
-			tm = std::gmtime(&tt); //GMT (UTC)
-		else // if (iom_::has(iom_::fmtflags::local))
+			tm = std::gmtime(&tt);    //GMT (UTC)
+		else                        // if (iom_::has(iom_::fmtflags::local))
 			tm = std::localtime(&tt); //Locale time-zone, usually UTC by default.
 		// else
 		//     tm = std::gmtime(&tt); //GMT (UTC)
@@ -644,19 +643,19 @@ namespace trie::chrono {
 			// another: `date +"%T.%9N"` => 11:49:19.162813535
 			//
 			os << std::put_time(tm, format) << ',' << std::setfill('0')
-					<< std::setw(3) << ms
-					<< std::setw(3) << us
-					<< std::setw(3) << ns
-					// << ',' << std::setw(9) << nanosec.count()
-					;
+			   << std::setw(3) << ms
+			   << std::setw(3) << us
+			   << std::setw(3) << ns
+			        // << ',' << std::setw(9) << nanosec.count()
+			        ;
 		} else if (iom_::has(iom_::fmtflags::us)) {
 			std::size_t fractional_seconds = time_point_get_us(time);
 			os << std::put_time(tm, format) << '.' << std::setfill('0')
-					<< std::setw(3) << ms
-					<< std::setw(3) << fractional_seconds;
+			   << std::setw(3) << ms
+			   << std::setw(3) << fractional_seconds;
 		} else if (iom_::has(iom_::fmtflags::ms)) {
 			os << std::put_time(tm, format) << '.' << std::setfill('0')
-					<< std::setw(3) << ms;
+			   << std::setw(3) << ms;
 		} else {
 			os << std::put_time(tm, format);
 		}
@@ -716,7 +715,7 @@ namespace trie::chrono {
      */
 	template<typename Clock = std::chrono::system_clock, bool GMT = false>
 	inline typename Clock::time_point last_day_at_this_month_in_time_point(
-		std::tm const &tm, int day_offset = 1, int month_delta = 0, int mday = 1) {
+	        std::tm const &tm, int day_offset = 1, int month_delta = 0, int mday = 1) {
 		std::tm tmp = tm;
 		if (day_offset < 1 || day_offset > 31)
 			return tm_2_time_point(tmp);
@@ -768,7 +767,7 @@ namespace trie::chrono {
 
 		// get December 31st
 		tmp.tm_mday = 1; // get next month 1st day
-		tmp.tm_mon = 0; // Dec 31th
+		tmp.tm_mon = 0;  // Dec 31th
 		tmp.tm_year++;
 
 		// subtract day_offset
@@ -803,10 +802,10 @@ namespace trie::chrono {
 		auto l = tm_2_time_point(tml);
 		auto r = tm_2_time_point(tmr);
 		return l == r
-			       ? 0
-			       : l < r
-				         ? -1
-				         : 1;
+		               ? 0
+		       : l < r
+		               ? -1
+		               : 1;
 	}
 } // namespace trie::chrono
 
@@ -825,8 +824,8 @@ namespace trie::chrono {
 		std::time_t tt = std::chrono::system_clock::to_time_t(_now);
 		std::tm *tm;
 		if (iom_::has(iom_::fmtflags::gmt_or_local))
-			tm = std::gmtime(&tt); //GMT (UTC)
-		else // if (iom_::has(iom_::fmtflags::local))
+			tm = std::gmtime(&tt);    //GMT (UTC)
+		else                        // if (iom_::has(iom_::fmtflags::local))
 			tm = std::localtime(&tt); //Locale time-zone, usually UTC by default.
 		// else
 		//     tm = std::gmtime(&tt); //GMT (UTC)
@@ -834,15 +833,15 @@ namespace trie::chrono {
 		if (iom_::has(iom_::fmtflags::ns)) {
 			auto _nsec = in_nsec();
 			os << std::put_time(tm, format) << '.' << std::setfill('0')
-					<< std::setw(9) << _nsec;
+			   << std::setw(9) << _nsec;
 		} else if (iom_::has(iom_::fmtflags::us)) {
 			auto _nsec = in_nsec();
 			os << std::put_time(tm, format) << '.' << std::setfill('0')
-					<< std::setw(6) << (_nsec / 1000);
+			   << std::setw(6) << (_nsec / 1000);
 		} else if (iom_::has(iom_::fmtflags::ms)) {
 			auto _nsec = in_nsec();
 			os << std::put_time(tm, format) << '.' << std::setfill('0')
-					<< std::setw(3) << (_nsec / 1'000'000);
+			   << std::setw(3) << (_nsec / 1'000'000);
 		} else {
 			os << std::put_time(tm, format);
 		}
@@ -874,10 +873,10 @@ namespace trie::chrono {
      * @endcode
      */
 	template<typename... _Args>
-	inline bool try_parse_by(std::tm &tm, std::string const &source_string, _Args const &... formats) {
+	inline bool try_parse_by(std::tm &tm, std::string const &source_string, _Args const &...formats) {
 		// if (sizeof...(_Args) > 0) {
 		std::tm tm_local_copy = tm;
-		for (auto &format: {"%Y-%m-%d %H:%M:%S", formats...}) {
+		for (auto &format : {"%Y-%m-%d %H:%M:%S", formats...}) {
 			std::stringstream ss(source_string);
 			if (!(ss >> std::get_time(&tm, format)).fail()) {
 				// printf("  . . . . parsed: %s\n", format_time_point(now).c_str());
@@ -914,7 +913,7 @@ namespace trie::chrono {
 
 	// not yet
 	template<class Duration,
-		std::enable_if_t<is_duration<Duration>::value, bool>  = true>
+	         std::enable_if_t<is_duration<Duration>::value, bool> = true>
 	static bool parse_duration(std::istream &is, Duration const &d) {
 		(void) (is);
 		(void) (d);
@@ -932,7 +931,7 @@ namespace trie::chrono {
 		CB _cb;
 
 		timer(CB const &fn = nullptr)
-			: _cb(fn) {
+		    : _cb(fn) {
 			gettimeofday(&t1, NULL);
 		}
 		~timer() {
@@ -940,7 +939,7 @@ namespace trie::chrono {
 			gettimeofday(&t2, NULL);
 
 			double elapsedTime;
-			elapsedTime = (t2.tv_sec - t1.tv_sec) * 1000.0; // sec to ms
+			elapsedTime = (t2.tv_sec - t1.tv_sec) * 1000.0;    // sec to ms
 			elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000.0; // us to ms
 
 			if (_cb)
@@ -954,9 +953,9 @@ namespace trie::chrono {
 
 // friends
 
-#if __cplusplus < 202002
+#if (__cplusplus < 202002L)
 template<typename T,
-	std::enable_if_t<trie::chrono::is_duration<T>::value, bool>  = true>
+         std::enable_if_t<trie::chrono::is_duration<T>::value, bool> = true>
 inline std::ostream &operator<<(std::ostream &os, T v) {
 	return trie::chrono::format_duration(os, v);
 }
@@ -989,7 +988,7 @@ operator<<(std::ostream &__os, const std::chrono::duration<_Rep, _Period> &__d) 
 #endif
 
 template<typename T,
-	std::enable_if_t<trie::chrono::is_duration<T>::value, bool> >
+         std::enable_if_t<trie::chrono::is_duration<T>::value, bool>>
 inline void trie::chrono::high_res_duration::print_duration(std::ostream &os, T v) {
 #if defined(_WIN32)
 	os << "It took ";
@@ -1003,11 +1002,13 @@ inline void trie::chrono::high_res_duration::print_duration(std::ostream &os, T 
 #endif
 }
 
+#if (__cplusplus < 202002L) // c++20a, c++17 and lower
 template<class _Clock, class _Duration = typename _Clock::duration>
 inline std::ostream &operator<<(std::ostream &os, std::chrono::time_point<_Clock, _Duration> const &time) {
 	// std::size_t ns = trie::chrono::time_point_get_ns(time);
 	return trie::chrono::serialize_time_point(os, time, "%F %T");
 }
+#endif
 
 inline std::ostream &operator<<(std::ostream &os, std::tm const *tm) {
 	return trie::chrono::serialize_tm(os, tm, "%F %T");
