@@ -359,7 +359,7 @@ jobs:
           cmake -E tar cfv ../${{ matrix.config.artifact }} --format=7zip .
 
       - name: Upload
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           path: ./${{ matrix.config.artifact }}
           name: ${{ matrix.config.artifact }}
@@ -389,7 +389,7 @@ jobs:
       - name: Store Release url
         run: |
           echo "${{ steps.create_release.outputs.upload_url }}" > ./upload_url
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           path: ./upload_url
           name: upload_url
